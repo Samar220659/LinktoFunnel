@@ -24,15 +24,15 @@ jobs:
     
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout @.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/portable-atomic-1.6.0/src/imp/interrupt/armv4t.rs
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node @.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/portable-atomic-1.6.0/src/imp/interrupt/armv4t.rs
         with:
           node-version: '20'
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v3
+        uses: pnpm/action-setup @.cache/node-gyp/24.9.0/include/node/openssl/archs/aix64-gcc-as/asm_avx2/include/openssl/x509v3.h
         with:
           version: 8
 
@@ -42,7 +42,7 @@ jobs:
           echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
 
       - name: Setup pnpm cache
-        uses: actions/cache@v4
+        uses: actions/cache @.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/portable-atomic-1.6.0/src/imp/interrupt/armv4t.rs
         with:
           path: ${{ env.STORE_PATH }}
           key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
@@ -59,7 +59,7 @@ jobs:
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
 
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact @.cache/node-gyp/24.9.0/include/node/openssl/archs/aix64-gcc-as/asm_avx2/include/openssl/x509v3.h
         with:
           path: ./out
 
@@ -73,4 +73,4 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages @.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/portable-atomic-1.6.0/src/imp/interrupt/armv4t.rs
