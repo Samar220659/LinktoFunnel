@@ -1,16 +1,38 @@
 {
-  "$schema": "https://railway.app/railway.schema.json",
+  "$schema": "https://railway.com/railway.schema.json",
   "build": {
-    "builder": "NIXPACKS",
-    "buildCommand": "npm install"
+    "builder": "RAILPACK"
   },
   "deploy": {
+    "runtime": "V2",
     "numReplicas": 1,
     "sleepApplication": false,
+    "useLegacyStacker": false,
+    "multiRegionConfig": {
+      "europe-west4-drams3a": {
+        "numReplicas": 1
+      }
+    },
     "restartPolicyType": "ON_FAILURE",
     "restartPolicyMaxRetries": 10
   },
   "services": [
+    {
+      "name": "telegram-bot",
+      "source": {
+        "type": "git"
+      },
+      "build": {
+        "buildCommand": "npm install"
+      },
+      "deploy": {
+        "startCommand": "node ai-agent/telegram-bot.js",
+        "runtime": "V2"
+      },
+      "env": {
+        "NODE_ENV": "production"
+      }
+    },
     {
       "name": "super-automation",
       "source": {
@@ -20,7 +42,8 @@
         "buildCommand": "npm install"
       },
       "deploy": {
-        "startCommand": "node ai-agent/SUPER_AUTOMATION.js"
+        "startCommand": "node ai-agent/SUPER_AUTOMATION.js",
+        "runtime": "V2"
       },
       "cron": {
         "schedule": "0 9 * * *",
@@ -31,24 +54,16 @@
       }
     },
     {
-      "name": "telegram-bot",
-      "source": {
-        "type": "git"
-      },
-      "deploy": {
-        "startCommand": "node ai-agent/telegram-bot.js"
-      },
-      "env": {
-        "NODE_ENV": "production"
-      }
-    },
-    {
       "name": "api-server",
       "source": {
         "type": "git"
       },
+      "build": {
+        "buildCommand": "npm install"
+      },
       "deploy": {
-        "startCommand": "node server.js"
+        "startCommand": "node server.js",
+        "runtime": "V2"
       },
       "healthcheckPath": "/health",
       "healthcheckTimeout": 100,
