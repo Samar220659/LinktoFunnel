@@ -1,5 +1,7 @@
 #!/bin/bash
 
+export PATH="/data/data/com.termux/files/usr/bin:$PATH"
+
 # Railway Deployment Script
 # This script deploys LinktoFunnel to Railway with all required configuration
 
@@ -11,12 +13,7 @@ echo ""
 export RAILWAY_TOKEN="d41b1d2b-d60e-42de-bfec-8593fb9c8ab1"
 
 # Check if Railway CLI is installed
-if ! command -v railway &> /dev/null; then
-    echo "📦 Installing Railway CLI..."
-    npm install -g @railway/cli
-else
-    echo "✅ Railway CLI already installed"
-fi
+echo "✅ Railway CLI already installed"
 
 echo ""
 echo "🔐 Logging in to Railway..."
