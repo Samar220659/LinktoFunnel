@@ -10,18 +10,19 @@
 		"build": "next build",
 		"start": "next start",
 		"lint": "next lint",
-		"test": "node scripts/test-apis.js"
+		"test": "node scripts/test-apis.js",
+		"bot": "node ai-agent/telegram-bot.js",
+		"automation": "node ai-agent/SUPER_AUTOMATION.js",
+		"server": "node server.js"
 	},
 	"dependencies": {
 		"@google-ai/generativelanguage": "^3.4.1",
 		"@supabase/supabase-js": "^2.39.0",
 		"node-telegram-bot-api": "^0.64.0",
 		"google-auth-library": "^9.0.0",
+		"dotenv": "^16.3.1",
 		"next": "^14.0.4",
 		"react": "^18.2.0",
 		"react-dom": "^18.2.0"
-	},
-	"devDependencies": {
-		"dotenv": "^16.3.1"
 	}
 }
