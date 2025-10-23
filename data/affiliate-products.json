@@ -1,0 +1,209 @@
+{
+  "products": [
+    {
+      "product_id": "ds24-580935",
+      "product_name": "Produkt 580935 (Checkout-DS24)",
+      "category": "online-marketing",
+      "affiliate_link": "https://www.checkout-ds24.com/redir/580935/Samarkande/",
+      "commission_rate": 40,
+      "conversion_score": 7.5,
+      "trend_score": 8.0,
+      "source": "checkout-ds24",
+      "priority": "medium",
+      "notes": "Checkout-DS24 Produkt"
+    },
+    {
+      "product_id": "ds24-580934",
+      "product_name": "Produkt 580934 (Checkout-DS24)",
+      "category": "online-marketing",
+      "affiliate_link": "https://www.checkout-ds24.com/redir/580934/Samarkande/",
+      "commission_rate": 40,
+      "conversion_score": 7.5,
+      "trend_score": 8.0,
+      "source": "checkout-ds24",
+      "priority": "medium",
+      "notes": "Checkout-DS24 Produkt"
+    },
+    {
+      "product_id": "ds24-547379",
+      "product_name": "Produkt 547379 (Checkout-DS24)",
+      "category": "online-marketing",
+      "affiliate_link": "https://www.checkout-ds24.com/redir/547379/Samarkande/",
+      "commission_rate": 40,
+      "conversion_score": 7.5,
+      "trend_score": 8.0,
+      "source": "checkout-ds24",
+      "priority": "medium",
+      "notes": "Checkout-DS24 Produkt"
+    },
+    {
+      "product_id": "marketing365-affiliate-secrets",
+      "product_name": "Affiliate Secrets Blackbook",
+      "category": "online-marketing",
+      "affiliate_link": "https://marketing365.online/affiliate-secrets-blackbook/#aff=Samarkande",
+      "commission_rate": 50,
+      "conversion_score": 9.0,
+      "trend_score": 8.5,
+      "source": "marketing365",
+      "priority": "high",
+      "notes": "HIGH-CONVERTING! Affiliate Marketing Kurs"
+    },
+    {
+      "product_id": "marketing365-monster-traffic",
+      "product_name": "Monster Traffic Strategien",
+      "category": "online-marketing",
+      "affiliate_link": "https://marketing365.online/monster-traffic-strategien/#aff=Samarkande",
+      "commission_rate": 50,
+      "conversion_score": 8.5,
+      "trend_score": 8.0,
+      "source": "marketing365",
+      "priority": "high",
+      "notes": "Traffic-Generierung - sehr gefragt"
+    },
+    {
+      "product_id": "marketing365-wordpress",
+      "product_name": "Das WordPress Kompendium",
+      "category": "software-tools",
+      "affiliate_link": "https://marketing365.online/das-wordpress-kompendium/#aff=Samarkande",
+      "commission_rate": 50,
+      "conversion_score": 7.0,
+      "trend_score": 7.5,
+      "source": "marketing365",
+      "priority": "medium",
+      "notes": "WordPress Training"
+    },
+    {
+      "product_id": "marketing365-webseiten",
+      "product_name": "Webseiten Komplettpaket",
+      "category": "software-tools",
+      "affiliate_link": "https://marketing365.online/webseiten-komplettpaket/#aff=Samarkande",
+      "commission_rate": 50,
+      "conversion_score": 7.5,
+      "trend_score": 7.0,
+      "source": "marketing365",
+      "priority": "medium",
+      "notes": "Website-Erstellung Paket"
+    },
+    {
+      "product_id": "marketing365-email-vorlagen",
+      "product_name": "42 Monster Email-Vorlagen",
+      "category": "online-marketing",
+      "affiliate_link": "https://marketing365.online/42-monster-email-vorlagen/#aff=Samarkande",
+      "commission_rate": 50,
+      "conversion_score": 8.0,
+      "trend_score": 7.5,
+      "source": "marketing365",
+      "priority": "high",
+      "notes": "E-Mail Marketing Templates"
+    },
+    {
+      "product_id": "digistore-411008",
+      "product_name": "Produkt 411008 (Digistore24)",
+      "category": "geld-verdienen",
+      "affiliate_link": "https://www.digistore24.com/redir/411008/Samarkande/",
+      "commission_rate": 45,
+      "conversion_score": 8.0,
+      "trend_score": 8.5,
+      "source": "digistore24",
+      "priority": "high",
+      "notes": "Geld verdienen Nische"
+    },
+    {
+      "product_id": "digistore-526734",
+      "product_name": "Produkt 526734 (Digistore24)",
+      "category": "geld-verdienen",
+      "affiliate_link": "https://www.digistore24.com/redir/526734/Samarkande/",
+      "commission_rate": 45,
+      "conversion_score": 8.0,
+      "trend_score": 8.5,
+      "source": "digistore24",
+      "priority": "high",
+      "notes": "Geld verdienen Nische"
+    },
+    {
+      "product_id": "digistore-528678",
+      "product_name": "Produkt 528678 (Digistore24)",
+      "category": "geld-verdienen",
+      "affiliate_link": "https://www.digistore24.com/redir/528678/Samarkande/",
+      "commission_rate": 45,
+      "conversion_score": 8.0,
+      "trend_score": 8.5,
+      "source": "digistore24",
+      "priority": "high",
+      "notes": "Geld verdienen Nische"
+    },
+    {
+      "product_id": "digistore-355316",
+      "product_name": "Produkt 355316 (Digistore24)",
+      "category": "geld-verdienen",
+      "affiliate_link": "https://www.digistore24.com/redir/355316/Samarkande/",
+      "commission_rate": 45,
+      "conversion_score": 8.0,
+      "trend_score": 8.5,
+      "source": "digistore24",
+      "priority": "high",
+      "notes": "Geld verdienen Nische"
+    },
+    {
+      "product_id": "60daydream-abnehmen",
+      "product_name": "Abnehmen ohne Diät",
+      "category": "gesundheit-fitness",
+      "affiliate_link": "https://produkte.60daydreambody.com/abnehmenohnediaet/#aff=Samarkande",
+      "commission_rate": 40,
+      "conversion_score": 9.0,
+      "trend_score": 9.0,
+      "source": "60daydreambody",
+      "priority": "very-high",
+      "notes": "MEGA-NISCHE! Abnehmen = hohe Conversion"
+    },
+    {
+      "product_id": "claudia-caldwell",
+      "product_name": "Claudia Caldwell Fitness",
+      "category": "gesundheit-fitness",
+      "affiliate_link": "https://www.claudiacaldwell.com/oto-uf61a?el=splittest-1214-bradflow-control#aff=Samarkande",
+      "commission_rate": 40,
+      "conversion_score": 8.5,
+      "trend_score": 8.0,
+      "source": "claudiacaldwell",
+      "priority": "high",
+      "notes": "Fitness/Gesundheit"
+    },
+    {
+      "product_id": "sharedeals-rohstoffe",
+      "product_name": "Reich mit Rohstoffen",
+      "category": "finanzen",
+      "affiliate_link": "https://www.sharedeals.de/reich_mit_rohstoffen_geschenk/#aff=Samarkande",
+      "commission_rate": 35,
+      "conversion_score": 7.0,
+      "trend_score": 7.5,
+      "source": "sharedeals",
+      "priority": "medium",
+      "notes": "Finanzen/Investment Nische"
+    }
+  ],
+  "statistics": {
+    "total_products": 15,
+    "categories": {
+      "online-marketing": 8,
+      "geld-verdienen": 4,
+      "gesundheit-fitness": 2,
+      "finanzen": 1
+    },
+    "average_commission": 43.3,
+    "top_converters": [
+      "marketing365-affiliate-secrets",
+      "60daydream-abnehmen",
+      "marketing365-monster-traffic"
+    ]
+  },
+  "recommendations": {
+    "start_with": [
+      "60daydream-abnehmen",
+      "marketing365-affiliate-secrets",
+      "marketing365-monster-traffic",
+      "digistore-411008",
+      "marketing365-email-vorlagen"
+    ],
+    "reasoning": "Diese 5 Produkte haben die höchsten Conversion-Scores und decken die profitabelsten Nischen ab: Gesundheit/Abnehmen + Online-Marketing/Geld verdienen"
+  }
+}
