@@ -1,0 +1,39 @@
+name: Deploy to Netlify
+
+on:
+  push:
+    branches:
+      - claude/dev-workflow-setup-011CUNKUQbhW3tnEnCj6cPRs # Or your main branch
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build project
+        run: npm run build
+
+      - name: Deploy to Netlify
+        env:
+          # Netlify Auth Token (required)
+          # Create a Netlify Personal Access Token: https://app.netlify.com/user/applications#personal-access-tokens
+          # Add it to your GitHub Secrets as NETLIFY_AUTH_TOKEN
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          # Netlify Site ID (required)
+          # Find it in your Netlify project settings under 'Site settings' -> 'General' -> 'Site details'
+          # Add it to your GitHub Secrets as NETLIFY_SITE_ID
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+        run: |
+          npm install netlify-cli -g
+          netlify deploy --prod --dir=./out # Assuming Next.js static export to 'out' directory
