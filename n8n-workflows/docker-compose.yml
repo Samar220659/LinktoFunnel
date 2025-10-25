@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: n8n-zz-lobby
+    restart: unless-stopped
+    ports:
+      - "5678:5678"
+    environment:
+      # Basis Config
+      - N8N_BASIC_AUTH_ACTIVE=true
+      - N8N_BASIC_AUTH_USER=admin
+      - N8N_BASIC_AUTH_PASSWORD=ZZLobby2025!
+      - N8N_HOST=0.0.0.0
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=http
+      - NODE_ENV=production
+      - WEBHOOK_URL=http://localhost:5678/
+
+      # Timezone
+      - GENERIC_TIMEZONE=Europe/Berlin
+      - TZ=Europe/Berlin
+
+      # Execution
+      - EXECUTIONS_PROCESS=main
+      - EXECUTIONS_MODE=regular
+
+      # Ihre API Keys (ANPASSEN!)
+      - GEMINI_API_KEY=AIzaSyCjmQnnPhLcj5cFG1r759jyX-C4xuwPzQE
+      - TELEGRAM_BOT_TOKEN=7215449153:AAEZekOaNe1_j9kd0kEyytKh0L0ajrwqJqk
+      - TELEGRAM_CHAT_ID=6982601388
+      - DIGISTORE24_API_KEY=1417598-BP9FgEF71a0Kpzh5wHMtaEr9w1k5qJyWHoHeS
+      - SUPABASE_URL=https://mkiliztwhxzwizwwjhqn.supabase.co
+      - SUPABASE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1raWxpenR3aHh6d2l6d3dqaHFuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA1NjY1ODksImV4cCI6MjA3NjE0MjU4OX0.olvY21Ppazo8d9z76FPZ4KzeLOY2UVqk8nUpnr1Xc-w
+
+    volumes:
+      - n8n_data:/home/node/.n8n
+      - ./:/workflows
+
+    networks:
+      - n8n-network
+
+volumes:
+  n8n_data:
+    driver: local
+
+networks:
+  n8n-network:
+    driver: bridge
