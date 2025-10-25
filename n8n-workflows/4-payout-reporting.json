@@ -1,0 +1,462 @@
+{
+  "name": "💸 Payout & Reporting - ZZ Lobby Elite",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "workflow-trigger",
+      "name": "When Called by Master",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 8 * * *"
+            }
+          ]
+        }
+      },
+      "id": "daily-schedule",
+      "name": "Daily at 8:00 AM",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [250, 100]
+    },
+    {
+      "parameters": {
+        "url": "https://www.digistore24.com/api/call/getAccountBalance/529808",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "id": "get-balance",
+      "name": "Get DigiStore24 Balance",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [450, 200],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "digistore24-api",
+          "name": "DigiStore24 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://www.digistore24.com/api/call/listPurchases/529808",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "start_date",
+              "value": "={{ $now.minus({days: 30}).toFormat('yyyy-MM-dd') }}"
+            },
+            {
+              "name": "end_date",
+              "value": "={{ $now.toFormat('yyyy-MM-dd') }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "get-transactions",
+      "name": "Get Last 30 Days Transactions",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [450, 400],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "digistore24-api",
+          "name": "DigiStore24 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "read",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Sales_Log",
+          "mode": "name"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "timestamp",
+              "lookupValue": "={{ $now.minus({days: 30}).toISO() }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "get-sales-data",
+      "name": "Get Sales from Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.4,
+      "position": [450, 600],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "google-sheets",
+          "name": "Google Sheets"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Calculate comprehensive business metrics\nconst balance = $('Get DigiStore24 Balance').first().json.balance || 0;\nconst transactions = $('Get Last 30 Days Transactions').all();\nconst salesLog = $('Get Sales from Sheets').all();\n\n// Revenue calculations\nconst totalRevenue = transactions.reduce((sum, t) => \n  sum + parseFloat(t.json.pay_amount || 0), 0\n);\nconst totalCommission = transactions.reduce((sum, t) => \n  sum + parseFloat(t.json.commission || 0), 0\n);\nconst salesCount = transactions.filter(t => \n  t.json.transaction_type === 'sale'\n).length;\n\n// Time-based metrics\nconst today = new Date();\nconst last7Days = transactions.filter(t => {\n  const date = new Date(t.json.created_at);\n  return (today - date) / (1000 * 60 * 60 * 24) <= 7;\n});\nconst last30Days = transactions;\n\nconst revenue7d = last7Days.reduce((sum, t) => \n  sum + parseFloat(t.json.commission || 0), 0\n);\nconst revenue30d = last30Days.reduce((sum, t) => \n  sum + parseFloat(t.json.commission || 0), 0\n);\n\n// Product performance\nconst productStats = {};\ntransactions.forEach(t => {\n  const pid = t.json.product_id;\n  if (!productStats[pid]) {\n    productStats[pid] = {\n      name: t.json.product_name,\n      sales: 0,\n      revenue: 0,\n      commission: 0\n    };\n  }\n  productStats[pid].sales++;\n  productStats[pid].revenue += parseFloat(t.json.pay_amount || 0);\n  productStats[pid].commission += parseFloat(t.json.commission || 0);\n});\n\nconst topProducts = Object.entries(productStats)\n  .sort((a, b) => b[1].commission - a[1].commission)\n  .slice(0, 5)\n  .map(([id, stats]) => ({\n    productId: id,\n    productName: stats.name,\n    sales: stats.sales,\n    commission: stats.commission.toFixed(2)\n  }));\n\n// Traffic source analysis\nconst sourceStats = {};\nsalesLog.forEach(s => {\n  const source = s.json.utm_source || 'direct';\n  if (!sourceStats[source]) {\n    sourceStats[source] = { count: 0, revenue: 0 };\n  }\n  sourceStats[source].count++;\n  sourceStats[source].revenue += parseFloat(s.json.commission || 0);\n});\n\nconst topSources = Object.entries(sourceStats)\n  .sort((a, b) => b[1].revenue - a[1].revenue)\n  .slice(0, 3)\n  .map(([source, stats]) => ({\n    source: source,\n    conversions: stats.count,\n    revenue: stats.revenue.toFixed(2)\n  }));\n\n// Growth calculations\nconst dailyAverage = revenue30d / 30;\nconst weeklyAverage = revenue7d / 7;\nconst growthRate = weeklyAverage > 0 && dailyAverage > 0\n  ? ((weeklyAverage - dailyAverage) / dailyAverage * 100).toFixed(2)\n  : 0;\n\n// Projections\nconst monthlyProjection = dailyAverage * 30;\nconst yearlyProjection = dailyAverage * 365;\n\n// Payout eligibility\nconst payoutEligible = balance >= 50;\nconst payoutAmount = payoutEligible ? Math.floor(balance) : 0;\n\nreturn {\n  timestamp: new Date().toISOString(),\n  balance: {\n    current: balance.toFixed(2),\n    payoutEligible: payoutEligible,\n    payoutAmount: payoutAmount\n  },\n  revenue: {\n    last7Days: revenue7d.toFixed(2),\n    last30Days: revenue30d.toFixed(2),\n    dailyAverage: dailyAverage.toFixed(2),\n    weeklyAverage: weeklyAverage.toFixed(2),\n    growthRate: growthRate,\n    monthlyProjection: monthlyProjection.toFixed(2),\n    yearlyProjection: yearlyProjection.toFixed(2)\n  },\n  sales: {\n    total30Days: salesCount,\n    last7Days: last7Days.length,\n    conversionRate: salesLog.length > 0 \n      ? (salesCount / salesLog.length * 100).toFixed(2) \n      : 0\n  },\n  topProducts: topProducts,\n  topSources: topSources,\n  performance: {\n    grade: balance > 100 ? 'A+' : balance > 50 ? 'A' : balance > 25 ? 'B' : 'C',\n    status: balance > 50 ? '🔥 Excellent' : balance > 25 ? '✅ Good' : '📈 Growing'\n  }\n};"
+      },
+      "id": "calculate-metrics",
+      "name": "Calculate Business Metrics",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [650, 400]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "payout-check",
+              "leftValue": "={{ $json.balance.payoutEligible }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "check-payout",
+      "name": "Check: Payout Eligible?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [850, 200]
+    },
+    {
+      "parameters": {
+        "url": "https://www.digistore24.com/api/call/requestPayout/529808",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "method": "POST",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "amount",
+              "value": "={{ $('Calculate Business Metrics').item.json.balance.payoutAmount }}"
+            },
+            {
+              "name": "payment_method",
+              "value": "paypal"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "request-payout",
+      "name": "Request DigiStore24 Payout",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1050, 100],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "digistore24-api",
+          "name": "DigiStore24 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "YOUR_TELEGRAM_CHAT_ID",
+        "text": "=💸 **PAYOUT INITIATED!**\n\n💰 Betrag: €{{ $('Calculate Business Metrics').item.json.balance.payoutAmount }}\n🏦 Methode: PayPal via DigiStore24\n⏱️ Erwartet in: 3-5 Werktagen\n\n📊 Dein aktueller Balance: €{{ $('Calculate Business Metrics').item.json.balance.current }}\n\n🎉 Gratulation zu deinem passiven Einkommen!",
+        "additionalFields": {}
+      },
+      "id": "telegram-payout-notification",
+      "name": "Telegram: Payout Notification",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [1250, 100],
+      "credentials": {
+        "telegramApi": {
+          "id": "telegram-bot",
+          "name": "Telegram Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "YOUR_TELEGRAM_CHAT_ID",
+        "text": "=📊 **DAILY BUSINESS REPORT**\n⏰ {{ $json.timestamp }}\n\n━━━━━━━━━━━━━━━━━━━━━━\n💰 **FINANZEN**\n━━━━━━━━━━━━━━━━━━━━━━\n💵 Aktueller Balance: €{{ $json.balance.current }}\n📈 Letzten 7 Tage: €{{ $json.revenue.last7Days }}\n📊 Letzten 30 Tage: €{{ $json.revenue.last30Days }}\n\n📉 Tages-Durchschnitt: €{{ $json.revenue.dailyAverage }}\n📈 Wachstumsrate: {{ $json.revenue.growthRate }}%\n\n━━━━━━━━━━━━━━━━━━━━━━\n🎯 **PROGNOSEN**\n━━━━━━━━━━━━━━━━━━━━━━\n📅 Monatlich: €{{ $json.revenue.monthlyProjection }}\n📅 Jährlich: €{{ $json.revenue.yearlyProjection }}\n\n━━━━━━━━━━━━━━━━━━━━━━\n📦 **TOP PRODUKTE**\n━━━━━━━━━━━━━━━━━━━━━━\n{{ $json.topProducts.map((p, i) => `${i+1}. ${p.productName}: ${p.sales} Sales | €${p.commission}`).join('\\n') }}\n\n━━━━━━━━━━━━━━━━━━━━━━\n🚀 **TRAFFIC QUELLEN**\n━━━━━━━━━━━━━━━━━━━━━━\n{{ $json.topSources.map((s, i) => `${i+1}. ${s.source}: ${s.conversions} Conv | €${s.revenue}`).join('\\n') }}\n\n━━━━━━━━━━━━━━━━━━━━━━\n⭐ **PERFORMANCE**\n━━━━━━━━━━━━━━━━━━━━━━\nGrade: {{ $json.performance.grade }}\nStatus: {{ $json.performance.status }}\n\n💎 Conversion Rate: {{ $json.sales.conversionRate }}%\n🎯 Sales (30 Tage): {{ $json.sales.total30Days }}\n\n{{ $json.balance.payoutEligible ? '✅ Payout verfügbar! (€' + $json.balance.payoutAmount + ')' : '⏳ Noch €' + (50 - parseFloat($json.balance.current)).toFixed(2) + ' bis Payout' }}\n\n🤖 Automatisierung läuft 24/7!",
+        "additionalFields": {}
+      },
+      "id": "telegram-daily-report",
+      "name": "Telegram: Daily Report",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [1050, 400],
+      "credentials": {
+        "telegramApi": {
+          "id": "telegram-bot",
+          "name": "Telegram Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Daily_Reports",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "date": "={{ $json.timestamp }}",
+            "balance": "={{ $json.balance.current }}",
+            "revenue_7d": "={{ $json.revenue.last7Days }}",
+            "revenue_30d": "={{ $json.revenue.last30Days }}",
+            "daily_average": "={{ $json.revenue.dailyAverage }}",
+            "growth_rate": "={{ $json.revenue.growthRate }}",
+            "monthly_projection": "={{ $json.revenue.monthlyProjection }}",
+            "yearly_projection": "={{ $json.revenue.yearlyProjection }}",
+            "sales_count": "={{ $json.sales.total30Days }}",
+            "conversion_rate": "={{ $json.sales.conversionRate }}",
+            "performance_grade": "={{ $json.performance.grade }}",
+            "payout_eligible": "={{ $json.balance.payoutEligible }}"
+          },
+          "matchingColumns": [],
+          "schema": []
+        },
+        "options": {}
+      },
+      "id": "save-report",
+      "name": "Save Report to Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.4,
+      "position": [1050, 600],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "google-sheets",
+          "name": "Google Sheets"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "method": "POST",
+        "url": "https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "contents",
+              "value": "={{ [{\"parts\":[{\"text\":\"Analyze this business performance data and provide 3 actionable recommendations to increase revenue: Balance: €\" + $json.balance.current + \", 30-day revenue: €\" + $json.revenue.last30Days + \", Growth rate: \" + $json.revenue.growthRate + \"%, Conversion rate: \" + $json.sales.conversionRate + \"%. Top product: \" + ($json.topProducts[0]?.productName || 'N/A') + \". Be specific and actionable.\"}]}] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "ai-recommendations",
+      "name": "AI: Get Recommendations",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [850, 600],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "gemini-api",
+          "name": "Gemini API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "YOUR_TELEGRAM_CHAT_ID",
+        "text": "=🤖 **AI EMPFEHLUNGEN**\n\n{{ $json.candidates[0].content.parts[0].text }}\n\n💡 Implementiere diese Strategien für maximales Wachstum!",
+        "additionalFields": {}
+      },
+      "id": "telegram-ai-recommendations",
+      "name": "Telegram: AI Recommendations",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [1050, 800],
+      "credentials": {
+        "telegramApi": {
+          "id": "telegram-bot",
+          "name": "Telegram Bot"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "When Called by Master": {
+      "main": [
+        [
+          {
+            "node": "Get DigiStore24 Balance",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Last 30 Days Transactions",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Sales from Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Daily at 8:00 AM": {
+      "main": [
+        [
+          {
+            "node": "Get DigiStore24 Balance",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Last 30 Days Transactions",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Sales from Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get DigiStore24 Balance": {
+      "main": [
+        [
+          {
+            "node": "Calculate Business Metrics",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Last 30 Days Transactions": {
+      "main": [
+        [
+          {
+            "node": "Calculate Business Metrics",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Sales from Sheets": {
+      "main": [
+        [
+          {
+            "node": "Calculate Business Metrics",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculate Business Metrics": {
+      "main": [
+        [
+          {
+            "node": "Check: Payout Eligible?",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Telegram: Daily Report",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Save Report to Sheets",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "AI: Get Recommendations",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check: Payout Eligible?": {
+      "main": [
+        [
+          {
+            "node": "Request DigiStore24 Payout",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Request DigiStore24 Payout": {
+      "main": [
+        [
+          {
+            "node": "Telegram: Payout Notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI: Get Recommendations": {
+      "main": [
+        [
+          {
+            "node": "Telegram: AI Recommendations",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 1,
+  "updatedAt": "2025-10-25T00:00:00.000Z",
+  "versionId": "4"
+}

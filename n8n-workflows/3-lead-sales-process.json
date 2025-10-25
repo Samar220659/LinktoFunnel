@@ -1,0 +1,484 @@
+{
+  "name": "💰 Lead & Sales Process - ZZ Lobby Elite",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "webhook-lead-sale",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook: New Lead/Sale",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [250, 300],
+      "webhookId": "lead-sale-webhook"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse and classify incoming webhook data\nconst data = $input.first().json;\n\nlet eventType = 'unknown';\nlet customer = {};\nlet transaction = {};\n\n// DigiStore24 webhook format\nif (data.event && data.event.includes('digistore24')) {\n  eventType = data.event === 'digistore24.sale' ? 'sale' : 'lead';\n  customer = {\n    email: data.customer?.email || data.billing_email,\n    name: data.customer?.first_name + ' ' + data.customer?.last_name,\n    phone: data.customer?.phone || '',\n    country: data.customer?.country || ''\n  };\n  transaction = {\n    orderId: data.order_id,\n    productId: data.product_id,\n    productName: data.product_name,\n    amount: parseFloat(data.pay_amount || 0),\n    currency: data.currency || 'EUR',\n    commission: parseFloat(data.commission || 0),\n    paymentMethod: data.payment_method\n  };\n}\n// GetResponse webhook format\nelse if (data.account_id || data.campaign_id) {\n  eventType = 'lead';\n  customer = {\n    email: data.email,\n    name: data.name || '',\n    phone: data.phone || '',\n    country: ''\n  };\n  transaction = {\n    orderId: 'LEAD-' + Date.now(),\n    productId: data.custom_fields?.product_id || 'unknown',\n    productName: data.custom_fields?.product_name || 'Lead Magnet',\n    amount: 0,\n    currency: 'EUR',\n    commission: 0,\n    paymentMethod: 'free_opt_in'\n  };\n}\n// Generic webhook fallback\nelse {\n  eventType = data.amount > 0 ? 'sale' : 'lead';\n  customer = {\n    email: data.email,\n    name: data.name || data.customer_name,\n    phone: data.phone || '',\n    country: data.country || ''\n  };\n  transaction = {\n    orderId: data.order_id || 'ORD-' + Date.now(),\n    productId: data.product_id || 'unknown',\n    productName: data.product_name || 'Unknown Product',\n    amount: parseFloat(data.amount || 0),\n    currency: data.currency || 'EUR',\n    commission: parseFloat(data.commission || 0),\n    paymentMethod: data.payment_method || 'unknown'\n  };\n}\n\nreturn {\n  eventType: eventType,\n  timestamp: new Date().toISOString(),\n  customer: customer,\n  transaction: transaction,\n  source: data.source || 'webhook',\n  utmSource: data.utm_source || '',\n  utmCampaign: data.utm_campaign || ''\n};"
+      },
+      "id": "parse-webhook",
+      "name": "Parse Webhook Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "sale-check",
+              "leftValue": "={{ $json.eventType }}",
+              "rightValue": "sale",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "check-event-type",
+      "name": "Check: Sale or Lead?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "url": "={{ $('Webhook: New Lead/Sale').item.json.query.supabase_url || 'https://mkiliztwhxzwizwwjhqn.supabase.co' }}/rest/v1/sales",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "method": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{ $('Webhook: New Lead/Sale').item.json.query.supabase_key }}"
+            },
+            {
+              "name": "Prefer",
+              "value": "return=representation"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "order_id",
+              "value": "={{ $json.transaction.orderId }}"
+            },
+            {
+              "name": "customer_email",
+              "value": "={{ $json.customer.email }}"
+            },
+            {
+              "name": "customer_name",
+              "value": "={{ $json.customer.name }}"
+            },
+            {
+              "name": "product_id",
+              "value": "={{ $json.transaction.productId }}"
+            },
+            {
+              "name": "product_name",
+              "value": "={{ $json.transaction.productName }}"
+            },
+            {
+              "name": "amount",
+              "value": "={{ $json.transaction.amount }}"
+            },
+            {
+              "name": "commission",
+              "value": "={{ $json.transaction.commission }}"
+            },
+            {
+              "name": "currency",
+              "value": "={{ $json.transaction.currency }}"
+            },
+            {
+              "name": "payment_method",
+              "value": "={{ $json.transaction.paymentMethod }}"
+            },
+            {
+              "name": "utm_source",
+              "value": "={{ $json.utmSource }}"
+            },
+            {
+              "name": "utm_campaign",
+              "value": "={{ $json.utmCampaign }}"
+            },
+            {
+              "name": "created_at",
+              "value": "={{ $json.timestamp }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "save-sale-supabase",
+      "name": "Save Sale to Supabase",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [850, 200],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "supabase-api",
+          "name": "Supabase API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "={{ $('Webhook: New Lead/Sale').item.json.query.supabase_url || 'https://mkiliztwhxzwizwwjhqn.supabase.co' }}/rest/v1/leads",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "method": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{ $('Webhook: New Lead/Sale').item.json.query.supabase_key }}"
+            },
+            {
+              "name": "Prefer",
+              "value": "return=representation"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "email",
+              "value": "={{ $json.customer.email }}"
+            },
+            {
+              "name": "name",
+              "value": "={{ $json.customer.name }}"
+            },
+            {
+              "name": "phone",
+              "value": "={{ $json.customer.phone }}"
+            },
+            {
+              "name": "country",
+              "value": "={{ $json.customer.country }}"
+            },
+            {
+              "name": "source",
+              "value": "={{ $json.source }}"
+            },
+            {
+              "name": "utm_source",
+              "value": "={{ $json.utmSource }}"
+            },
+            {
+              "name": "utm_campaign",
+              "value": "={{ $json.utmCampaign }}"
+            },
+            {
+              "name": "status",
+              "value": "new"
+            },
+            {
+              "name": "created_at",
+              "value": "={{ $json.timestamp }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "save-lead-supabase",
+      "name": "Save Lead to Supabase",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [850, 400],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "supabase-api",
+          "name": "Supabase API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://api.getresponse.com/v3/contacts",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "method": "POST",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "email",
+              "value": "={{ $('Parse Webhook Data').item.json.customer.email }}"
+            },
+            {
+              "name": "name",
+              "value": "={{ $('Parse Webhook Data').item.json.customer.name }}"
+            },
+            {
+              "name": "campaign",
+              "value": "={{ {\"campaignId\": \"YOUR_CAMPAIGN_ID\"} }}"
+            },
+            {
+              "name": "customFieldValues",
+              "value": "={{ [{\"customFieldId\": \"YOUR_FIELD_ID\", \"value\": [$('Parse Webhook Data').item.json.transaction.productName]}] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "add-to-getresponse",
+      "name": "Add to GetResponse",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1050, 300],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "getresponse-api",
+          "name": "GetResponse API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Sales_Log",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "timestamp": "={{ $('Parse Webhook Data').item.json.timestamp }}",
+            "event_type": "={{ $('Parse Webhook Data').item.json.eventType }}",
+            "order_id": "={{ $('Parse Webhook Data').item.json.transaction.orderId }}",
+            "customer_email": "={{ $('Parse Webhook Data').item.json.customer.email }}",
+            "customer_name": "={{ $('Parse Webhook Data').item.json.customer.name }}",
+            "product_name": "={{ $('Parse Webhook Data').item.json.transaction.productName }}",
+            "amount": "={{ $('Parse Webhook Data').item.json.transaction.amount }}",
+            "commission": "={{ $('Parse Webhook Data').item.json.transaction.commission }}",
+            "currency": "={{ $('Parse Webhook Data').item.json.transaction.currency }}",
+            "utm_source": "={{ $('Parse Webhook Data').item.json.utmSource }}",
+            "utm_campaign": "={{ $('Parse Webhook Data').item.json.utmCampaign }}"
+          },
+          "matchingColumns": [],
+          "schema": []
+        },
+        "options": {}
+      },
+      "id": "log-to-sheets",
+      "name": "Log to Google Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.4,
+      "position": [1050, 500],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "google-sheets",
+          "name": "Google Sheets"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "YOUR_TELEGRAM_CHAT_ID",
+        "text": "=💰 **NEUE SALE!**\n\n🎉 Order: {{ $('Parse Webhook Data').item.json.transaction.orderId }}\n👤 Kunde: {{ $('Parse Webhook Data').item.json.customer.name }}\n📧 Email: {{ $('Parse Webhook Data').item.json.customer.email }}\n\n📦 Produkt: {{ $('Parse Webhook Data').item.json.transaction.productName }}\n💵 Betrag: €{{ $('Parse Webhook Data').item.json.transaction.amount }}\n💸 Deine Provision: €{{ $('Parse Webhook Data').item.json.transaction.commission }}\n\n🎯 Quelle: {{ $('Parse Webhook Data').item.json.utmSource }}\n📊 Kampagne: {{ $('Parse Webhook Data').item.json.utmCampaign }}\n\n✅ Automatisch gespeichert in:\n• Supabase Datenbank\n• Google Sheets\n• GetResponse Email-Liste\n\n🚀 Weiter so! Das passive Einkommen fließt!",
+        "additionalFields": {}
+      },
+      "id": "telegram-sale-notification",
+      "name": "Telegram: Sale Notification",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [1250, 200],
+      "credentials": {
+        "telegramApi": {
+          "id": "telegram-bot",
+          "name": "Telegram Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "YOUR_TELEGRAM_CHAT_ID",
+        "text": "=📧 **Neuer Lead!**\n\n👤 {{ $('Parse Webhook Data').item.json.customer.name }}\n📧 {{ $('Parse Webhook Data').item.json.customer.email }}\n\n🎯 Quelle: {{ $('Parse Webhook Data').item.json.utmSource }}\n📊 Kampagne: {{ $('Parse Webhook Data').item.json.utmCampaign }}\n\n✅ Lead gespeichert und zu GetResponse hinzugefügt\n🔄 Automatische Follow-up Serie gestartet",
+        "additionalFields": {}
+      },
+      "id": "telegram-lead-notification",
+      "name": "Telegram: Lead Notification",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [1250, 400],
+      "credentials": {
+        "telegramApi": {
+          "id": "telegram-bot",
+          "name": "Telegram Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ {\"status\": \"success\", \"message\": \"Webhook processed\", \"eventType\": $('Parse Webhook Data').item.json.eventType, \"orderId\": $('Parse Webhook Data').item.json.transaction.orderId} }}",
+        "options": {}
+      },
+      "id": "webhook-response",
+      "name": "Send Webhook Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [1450, 300]
+    }
+  ],
+  "connections": {
+    "Webhook: New Lead/Sale": {
+      "main": [
+        [
+          {
+            "node": "Parse Webhook Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Webhook Data": {
+      "main": [
+        [
+          {
+            "node": "Check: Sale or Lead?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check: Sale or Lead?": {
+      "main": [
+        [
+          {
+            "node": "Save Sale to Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Save Lead to Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Sale to Supabase": {
+      "main": [
+        [
+          {
+            "node": "Add to GetResponse",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Log to Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Lead to Supabase": {
+      "main": [
+        [
+          {
+            "node": "Add to GetResponse",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Log to Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add to GetResponse": {
+      "main": [
+        [
+          {
+            "node": "Telegram: Sale Notification",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Telegram: Lead Notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log to Google Sheets": {
+      "main": [
+        [
+          {
+            "node": "Send Webhook Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram: Sale Notification": {
+      "main": [
+        [
+          {
+            "node": "Send Webhook Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram: Lead Notification": {
+      "main": [
+        [
+          {
+            "node": "Send Webhook Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2025-10-25T00:00:00.000Z",
+  "versionId": "3"
+}

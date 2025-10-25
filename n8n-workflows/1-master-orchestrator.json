@@ -1,0 +1,378 @@
+{
+  "name": "🧠 Master Orchestrator - ZZ Lobby Elite",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 5
+            }
+          ]
+        }
+      },
+      "id": "cron-trigger",
+      "name": "Every 5 Minutes",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "url": "https://www.digistore24.com/api/call/getAccountBalance/529808",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "id": "digistore-balance",
+      "name": "Get DigiStore24 Balance",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [450, 300],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "digistore24-api",
+          "name": "DigiStore24 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "read",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "KPIs",
+          "mode": "name"
+        },
+        "options": {}
+      },
+      "id": "read-kpis",
+      "name": "Read Current KPIs",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.4,
+      "position": [450, 480],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "google-sheets",
+          "name": "Google Sheets"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Calculate Health Score and Business Metrics\nconst balance = $input.first().json.balance || 0;\nconst kpis = $input.last().json;\n\nconst conversionRate = parseFloat(kpis.conversion_rate) || 0;\nconst dailyRevenue = parseFloat(kpis.daily_revenue) || 0;\nconst monthlyRevenue = parseFloat(kpis.monthly_revenue) || 0;\n\n// Health Score Calculation (0-100)\nlet healthScore = 0;\nif (conversionRate >= 15) healthScore += 40;\nelse if (conversionRate >= 10) healthScore += 25;\nelse if (conversionRate >= 5) healthScore += 10;\n\nif (dailyRevenue >= 200) healthScore += 30;\nelse if (dailyRevenue >= 100) healthScore += 20;\nelse if (dailyRevenue >= 50) healthScore += 10;\n\nif (monthlyRevenue >= 5000) healthScore += 30;\nelse if (monthlyRevenue >= 2500) healthScore += 20;\nelse if (monthlyRevenue >= 1000) healthScore += 10;\n\n// Decision Logic\nconst decisions = {\n  needsPayout: balance >= 50 || new Date().getDate() === 1,\n  needsScaling: conversionRate > 15 && dailyRevenue < 200,\n  needsOptimization: conversionRate < 8,\n  timestamp: new Date().toISOString(),\n  healthScore: healthScore,\n  metrics: {\n    balance: balance,\n    conversionRate: conversionRate,\n    dailyRevenue: dailyRevenue,\n    monthlyRevenue: monthlyRevenue\n  }\n};\n\nreturn decisions;"
+      },
+      "id": "business-logic",
+      "name": "Business Intelligence Engine",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [650, 390]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "payout-check",
+              "leftValue": "={{ $json.needsPayout }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "check-payout",
+      "name": "Check: Needs Payout?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [850, 200]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "scaling-check",
+              "leftValue": "={{ $json.needsScaling }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "check-scaling",
+      "name": "Check: Needs Scaling?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [850, 390]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "optimization-check",
+              "leftValue": "={{ $json.needsOptimization }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "check-optimization",
+      "name": "Check: Needs Optimization?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [850, 580]
+    },
+    {
+      "parameters": {
+        "workflowId": "={{ 'WORKFLOW_ID_PAYOUT' }}",
+        "options": {}
+      },
+      "id": "trigger-payout",
+      "name": "▶ Start Payout Workflow",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.1,
+      "position": [1050, 100]
+    },
+    {
+      "parameters": {
+        "workflowId": "={{ 'WORKFLOW_ID_SCALING' }}",
+        "options": {}
+      },
+      "id": "trigger-scaling",
+      "name": "▶ Start Traffic Scaling",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.1,
+      "position": [1050, 300]
+    },
+    {
+      "parameters": {
+        "workflowId": "={{ 'WORKFLOW_ID_OPTIMIZATION' }}",
+        "options": {}
+      },
+      "id": "trigger-optimization",
+      "name": "▶ Start Content Optimization",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.1,
+      "position": [1050, 500]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Health_Log",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "timestamp": "={{ $json.timestamp }}",
+            "health_score": "={{ $json.healthScore }}",
+            "balance": "={{ $json.metrics.balance }}",
+            "conversion_rate": "={{ $json.metrics.conversionRate }}",
+            "daily_revenue": "={{ $json.metrics.dailyRevenue }}",
+            "monthly_revenue": "={{ $json.metrics.monthlyRevenue }}",
+            "payout_triggered": "={{ $json.needsPayout }}",
+            "scaling_triggered": "={{ $json.needsScaling }}",
+            "optimization_triggered": "={{ $json.needsOptimization }}"
+          },
+          "matchingColumns": [],
+          "schema": []
+        },
+        "options": {}
+      },
+      "id": "log-health",
+      "name": "Log Health Score",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.4,
+      "position": [1050, 700],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "google-sheets",
+          "name": "Google Sheets"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "YOUR_TELEGRAM_CHAT_ID",
+        "text": "=🧠 **Master Orchestrator Check**\n⏰ {{ $json.timestamp }}\n\n📊 **Health Score:** {{ $json.healthScore }}/100\n💰 **Balance:** €{{ $json.metrics.balance }}\n📈 **Conversion Rate:** {{ $json.metrics.conversionRate }}%\n💵 **Daily Revenue:** €{{ $json.metrics.dailyRevenue }}\n📅 **Monthly Revenue:** €{{ $json.metrics.monthlyRevenue }}\n\n{{ $json.needsPayout ? '✅ Payout triggered' : '' }}\n{{ $json.needsScaling ? '✅ Scaling triggered' : '' }}\n{{ $json.needsOptimization ? '✅ Optimization triggered' : '' }}",
+        "additionalFields": {}
+      },
+      "id": "telegram-notification",
+      "name": "Send Telegram Update",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [1250, 700],
+      "credentials": {
+        "telegramApi": {
+          "id": "telegram-bot",
+          "name": "Telegram Bot"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Every 5 Minutes": {
+      "main": [
+        [
+          {
+            "node": "Get DigiStore24 Balance",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Read Current KPIs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get DigiStore24 Balance": {
+      "main": [
+        [
+          {
+            "node": "Business Intelligence Engine",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Current KPIs": {
+      "main": [
+        [
+          {
+            "node": "Business Intelligence Engine",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Business Intelligence Engine": {
+      "main": [
+        [
+          {
+            "node": "Check: Needs Payout?",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Check: Needs Scaling?",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Check: Needs Optimization?",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Log Health Score",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check: Needs Payout?": {
+      "main": [
+        [
+          {
+            "node": "▶ Start Payout Workflow",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check: Needs Scaling?": {
+      "main": [
+        [
+          {
+            "node": "▶ Start Traffic Scaling",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check: Needs Optimization?": {
+      "main": [
+        [
+          {
+            "node": "▶ Start Content Optimization",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Health Score": {
+      "main": [
+        [
+          {
+            "node": "Send Telegram Update",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 1,
+  "updatedAt": "2025-10-23T00:00:00.000Z",
+  "versionId": "1"
+}
