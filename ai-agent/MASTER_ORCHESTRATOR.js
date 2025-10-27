@@ -21,6 +21,7 @@ const { createClient } = require('@supabase/supabase-js');
 const { Digistore24Client } = require('./integrations/digistore24');
 const { ZZLobbyBridge } = require('./integrations/zz-lobby-bridge');
 const { runGenerationJob } = require('../lib/generator');
+const { SocialMediaPoster } = require('./agents/social-media-poster-cjs');
 
 // Initialize all services
 const supabase = createClient(
@@ -71,6 +72,9 @@ class DigitalTwin {
       'scale_winners',
       'pause_losers',
     ];
+
+    // Initialize Social Media Poster
+    this.socialPoster = new SocialMediaPoster();
   }
 
   async initialize() {
@@ -204,7 +208,7 @@ class DigitalTwin {
       log(`   📦 ${products.length} Produkte für Content-Generierung`, 'blue');
 
       for (const product of products) {
-        log(`\n   ▶️  Video für: ${product.product_name}`, 'cyan');
+        log(`\n   ▶️  Content für: ${product.product_name}`, 'cyan');
 
         // Erstelle Video mit LinktoFunnel
         // (Simplified - in production würde hier die echte Video-Pipeline laufen)
@@ -226,6 +230,10 @@ class DigitalTwin {
           });
 
         log(`   ✅ Video generiert: ${videoData.videoUrl}`, 'green');
+
+        // Social Media Post erstellen
+        const socialContent = this.socialPoster.generateProductPost(product);
+        await this.socialPoster.createAndPost(socialContent, 'product_launch');
 
         // Markiere als promoted
         await supabase
@@ -438,6 +446,17 @@ class DigitalTwin {
       `🎯 Produkte: ${this.state.activeProducts}\n` +
       `🌪️ Funnels: ${this.state.activeCampaigns}`
     );
+
+    // Wöchentlicher Social Media Performance Post (jeden Sonntag)
+    const today = new Date().getDay();
+    if (today === 0) { // Sonntag
+      const performancePost = this.socialPoster.generatePerformancePost({
+        revenue: this.state.totalRevenue,
+        conversionRate: this.state.conversionRate,
+        activeCampaigns: this.state.activeCampaigns
+      });
+      await this.socialPoster.createAndPost(performancePost, 'performance_update');
+    }
   }
 
   // ===== UTILS =====
