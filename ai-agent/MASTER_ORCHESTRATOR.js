@@ -22,6 +22,7 @@ const { Digistore24Client } = require('./integrations/digistore24');
 const { ZZLobbyBridge } = require('./integrations/zz-lobby-bridge');
 const { runGenerationJob } = require('../lib/generator');
 const { SocialMediaPoster } = require('./agents/social-media-poster-cjs');
+const { CrossPoster } = require('./agents/cross-poster');
 
 // Initialize all services
 const supabase = createClient(
@@ -73,8 +74,11 @@ class DigitalTwin {
       'pause_losers',
     ];
 
-    // Initialize Social Media Poster
+    // Initialize Social Media Poster (for text posts)
     this.socialPoster = new SocialMediaPoster();
+
+    // Initialize Cross Poster (for video/image posts to TikTok, Instagram, YouTube)
+    this.crossPoster = new CrossPoster();
   }
 
   async initialize() {
@@ -231,9 +235,39 @@ class DigitalTwin {
 
         log(`   ✅ Video generiert: ${videoData.videoUrl}`, 'green');
 
-        // Social Media Post erstellen
+        // 1. Text-Posts auf Buffer/Ayrshare (Facebook, Twitter, LinkedIn, Pinterest)
         const socialContent = this.socialPoster.generateProductPost(product);
         await this.socialPoster.createAndPost(socialContent, 'product_launch');
+
+        // 2. Video-Posts auf TikTok, Instagram, YouTube
+        log(`\n   📱 Verteile Video auf Social Media Plattformen...`, 'cyan');
+
+        const contentForPosting = {
+          id: product.id,
+          product_name: product.product_name,
+          video_url: videoData.videoUrl,
+          affiliate_link: product.affiliate_link,
+          script: {
+            hook: `🔥 ${product.product_name}`,
+            value: `Entdecke ${product.product_name} - Deine Chance auf passives Einkommen!`,
+            cta: `Link in Bio! 👆`,
+            hashtags: ['passiveincome', 'affiliate', 'makemoneyonline', product.niche?.replace(/\s+/g, '') || 'business']
+          }
+        };
+
+        try {
+          // Poste auf alle Video-Plattformen
+          const postResults = await this.crossPoster.crossPost(
+            contentForPosting,
+            ['tiktok', 'instagram', 'youtube'] // Plattformen
+          );
+
+          const successCount = postResults.filter(r => r.success).length;
+          log(`   ✅ Video auf ${successCount}/${postResults.length} Plattformen gepostet`, 'green');
+
+        } catch (err) {
+          log(`   ⚠️  Video-Posting fehlgeschlagen: ${err.message}`, 'yellow');
+        }
 
         // Markiere als promoted
         await supabase
