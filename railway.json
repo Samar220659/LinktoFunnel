@@ -54,6 +54,26 @@
       }
     },
     {
+      "name": "master-orchestrator",
+      "source": {
+        "type": "git"
+      },
+      "build": {
+        "buildCommand": "pnpm install || npm install"
+      },
+      "deploy": {
+        "startCommand": "node ai-agent/MASTER_ORCHESTRATOR.js",
+        "runtime": "V2"
+      },
+      "cron": {
+        "schedule": "0 10,18 * * *",
+        "command": "node ai-agent/MASTER_ORCHESTRATOR.js"
+      },
+      "env": {
+        "NODE_ENV": "production"
+      }
+    },
+    {
       "name": "api-server",
       "source": {
         "type": "git"
@@ -79,9 +99,11 @@
         "REQUIRED": [
           "NEXT_PUBLIC_SUPABASE_URL",
           "NEXT_PUBLIC_SUPABASE_ANON_KEY",
+          "SUPABASE_SERVICE_ROLE_KEY",
           "GEMINI_API_KEY",
           "TELEGRAM_BOT_TOKEN",
-          "TELEGRAM_CHAT_ID"
+          "TELEGRAM_CHAT_ID",
+          "DIGISTORE24_API_KEY"
         ]
       }
     }
