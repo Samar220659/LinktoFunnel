@@ -1,9 +1,25 @@
 /**
- * ECHTE DIGISTORE24 AFFILIATE-LINKS
- * Vom User bereitgestellt - 15 Produkte
+ * ECHTE AFFILIATE-LINKS
+ * Vom User bereitgestellt - 16 Produkte
  */
 
 const REAL_AFFILIATE_PRODUCTS = [
+  // === 🔥 FREECASH - PRIORITY PUSH (1 Produkt) ===
+  {
+    product_id: 'FREECASH-001',
+    product_name: 'FreeCash - Geld verdienen mit Umfragen & Aufgaben',
+    product_url: 'https://freecash.com/r/937e03b9426f33c00365',
+    affiliate_link: 'https://freecash.com/r/937e03b9426f33c00365',
+    category: 'geld-verdienen',
+    vendor_name: 'FreeCash',
+    commission_rate: 50,
+    price: 0.00, // Free to join
+    description: 'Verdiene Geld online durch Umfragen, Spiele, Aufgaben und Cashback. Schnelle Auszahlung per PayPal, Crypto oder Geschenkkarten. Über 50 Millionen verdient!',
+    gravity_score: 98.0,
+    conversion_score: 9.8,
+    trend_score: 9.9,
+  },
+
   // === CHECKOUT-DS24 (3 Produkte) ===
   {
     product_id: 'DS24-580935',
