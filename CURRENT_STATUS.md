@@ -2,7 +2,8 @@
 
 **Stand:** 2025-11-01
 **Branch:** claude/dev-workflow-setup-011CUNKUQbhW3tnEnCj6cPRs
-**Letzte Commits:** efdbe31
+**Letzte Commits:** d26708d (Automation System)
+**Status:** 🤖 VOLLAUTOMATISCH & PRODUCTION-READY
 
 ---
 
@@ -70,11 +71,43 @@ Phasen:
 
 ---
 
-## 📱 **TERMUX QUICK COMMANDS:**
+## 🤖 **VOLLAUTOMATISCHES SYSTEM (NEU!):**
 
-### **Setup & Übersicht:**
+### **⚡ ONE-COMMAND START:**
 ```bash
-cd ~/LinktoFunnel && bash setup-and-test.sh
+cd ~/LinktoFunnel && bash start.sh
+```
+**→ Interaktives Menü mit allen Funktionen!**
+
+### **🔥 Automatisierungs-Features:**
+```
+✅ auto-run-daily.sh      → Täglicher automatischer Durchlauf
+✅ setup-cron.sh          → Cron-Setup für Termux (10:00 & 18:00)
+✅ start.sh               → Interaktives Hauptmenü
+✅ railway.json           → Cloud-Deployment mit Cron
+✅ AUTOMATION_GUIDE.md    → Vollständige Automatisierungs-Doku
+```
+
+### **📅 Automatische Ausführung:**
+```
+Täglich um 10:00 Uhr   → Vollständiger Durchlauf
+Täglich um 18:00 Uhr   → Zweiter Durchlauf
+Logs: ~/LinktoFunnel/logs/auto-run-YYYY-MM-DD.log
+Auto-Cleanup: Logs älter als 7 Tage werden gelöscht
+```
+
+---
+
+## 📱 **TERMUX MANUAL COMMANDS:**
+
+### **Einmalig ausführen:**
+```bash
+cd ~/LinktoFunnel && bash auto-run-daily.sh
+```
+
+### **Cron-Setup (für automatische Ausführung):**
+```bash
+cd ~/LinktoFunnel && bash setup-cron.sh
 ```
 
 ### **System-Test (komplett offline):**
@@ -155,12 +188,29 @@ Top Kampagnen:
 
 - `README.md` - Projekt-Übersicht
 - `GETTING_STARTED.md` - Erste Schritte
+- `AUTOMATION_GUIDE.md` - 🆕 **Vollständiger Automatisierungs-Guide**
 - `DEPLOYMENT_GUIDE.md` - Deployment-Anleitung
 - `docs/SUPABASE_KEY_PROBLEM.md` - Supabase Key Erklärung
 - `setup-and-test.sh` - Quick-Setup Script
 
 ---
 
-**🎉 SYSTEM IST BEREIT FÜR PRODUKTION!**
+## 🎉 **SYSTEM IST 100% BEREIT!**
 
-*Offline-Testing vollständig funktional | FreeCash als Top-Produkt integriert*
+### ✅ **Was funktioniert:**
+- 🤖 Vollautomatische tägliche Ausführung
+- 💰 16 echte Affiliate-Produkte (FreeCash #1)
+- 🎬 Kompletter 6-Phasen Workflow
+- 📊 Logging & Performance-Tracking
+- ☁️ Railway/Cloud-Deployment ready
+- 📱 Termux + Cron ready
+
+### 🚀 **Nächster Schritt für dich:**
+```bash
+cd ~/LinktoFunnel && bash start.sh
+```
+**Wähle Option 2 für automatische Ausführung!**
+
+---
+
+*Stand: 1. November 2025 - Version 2.0: Vollautomatisch*
