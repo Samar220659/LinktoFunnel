@@ -289,6 +289,10 @@ install_cron() {
 
     cat > "$CRON_FILE" << 'EOF'
 # LinktoFunnel Automation Cron Jobs
+
+# 🌌 GENESIS Autonomous Cycles (every 4 hours)
+0 */4 * * * ~/LinktoFunnel/termux-automation.sh genesis
+
 # Content-Generierung jeden Morgen um 8:00
 0 8 * * * ~/LinktoFunnel/termux-automation.sh daily
 
@@ -316,11 +320,31 @@ EOF
     return 0
 }
 
+# GENESIS System Integration
+run_genesis() {
+    log "🌌 Executing GENESIS autonomous cycle..."
+
+    cd "$PROJECT_DIR" || error_exit "CD fehlgeschlagen"
+
+    # Run GENESIS
+    OUTPUT=$(node genesis-system.js 2>&1) || error_exit "GENESIS execution failed"
+
+    log "✅ GENESIS cycle completed"
+
+    # Send report
+    send_telegram_notification "🌌 GENESIS cycle completed successfully"
+
+    return 0
+}
+
 # Main Command Handler
 main() {
     local command="${1:-help}"
 
     case "$command" in
+        genesis)
+            run_genesis
+            ;;
         generate|gen)
             generate_content
             ;;
@@ -356,6 +380,7 @@ USAGE:
     ./termux-automation.sh [COMMAND]
 
 COMMANDS:
+    genesis             🌌 Run GENESIS autonomous cycle
     generate, gen       Generiere Daily Content
     post                Bereite Content zum Posten vor
     analytics           Tracke Analytics
@@ -368,6 +393,7 @@ COMMANDS:
     help                Zeige diese Hilfe
 
 EXAMPLES:
+    ./termux-automation.sh genesis        # GENESIS autonomous cycle
     ./termux-automation.sh daily          # Daily Routine ausführen
     ./termux-automation.sh generate       # Nur Content generieren
     ./termux-automation.sh calendar       # 30-Tage Kalender
