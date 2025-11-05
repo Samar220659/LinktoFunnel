@@ -16,6 +16,10 @@ Generate **€5,000/month** passive income through autonomous content creation a
 4. **Measurable Results** - Tracks every success
 5. **Continuous Improvement** - Self-optimizes daily
 
+### 🚀 ZERO-SETUP READY
+
+GENESIS works immediately without any API keys! The intelligent fallback system generates high-quality, platform-specific content automatically. Add a Gemini API key later for AI-enhanced content, but it's completely optional.
+
 ---
 
 ## 🔄 DAILY CYCLE
@@ -233,13 +237,27 @@ adjustStrategy(bestPerformers) {
 
 ### "No content generated"
 
+GENESIS now includes intelligent fallback content generation! Even without a Gemini API key, the system will generate high-quality, platform-specific content using built-in templates.
+
 ```bash
-# Check Gemini API Key
+# Check Gemini API Key (optional - system works without it)
 cat .env.local | grep GEMINI
 
 # Test content generator
 node ai-agent/agents/content-generator.js
 ```
+
+**Note:** GENESIS will automatically use fallback content if:
+- No Gemini API key is configured
+- API key is invalid or expired
+- API rate limit is reached
+- Network issues prevent API access
+
+The fallback system generates platform-specific content with:
+✅ Unique hooks and captions for each platform
+✅ Randomized content for variety
+✅ Proper hashtags and CTAs
+✅ Optimal posting times
 
 ### "State not saving"
 
