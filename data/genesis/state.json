@@ -1,14 +1,14 @@
 {
   "version": "1.0.0",
-  "savedAt": "2025-11-05T18:05:29.287Z",
+  "savedAt": "2025-11-05T18:12:45.838Z",
   "metrics": {
-    "contentGenerated": 8,
+    "contentGenerated": 16,
     "postsPublished": 0,
     "followersGained": 0,
     "clicksTracked": 0,
     "conversions": 0,
     "revenue": 0,
-    "cyclesCompleted": 4
+    "cyclesCompleted": 6
   },
   "learningData": [
     {
@@ -58,6 +58,36 @@
     },
     {
       "date": "2025-11-05T18:05:29.197Z",
+      "insights": [
+        {
+          "platform": "TikTok",
+          "metric": "Engagement",
+          "value": "8.5%"
+        },
+        {
+          "platform": "Instagram",
+          "metric": "Reach",
+          "value": "12K"
+        }
+      ]
+    },
+    {
+      "date": "2025-11-05T18:11:50.422Z",
+      "insights": [
+        {
+          "platform": "TikTok",
+          "metric": "Engagement",
+          "value": "8.5%"
+        },
+        {
+          "platform": "Instagram",
+          "metric": "Reach",
+          "value": "12K"
+        }
+      ]
+    },
+    {
+      "date": "2025-11-05T18:12:45.752Z",
       "insights": [
         {
           "platform": "TikTok",
