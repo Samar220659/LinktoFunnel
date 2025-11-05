@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: linktofunnel
+    env: node
+    region: frankfurt
+    plan: free
+    buildCommand: pnpm install && pnpm run build
+    startCommand: pnpm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
