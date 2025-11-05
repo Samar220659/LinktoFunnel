@@ -13,6 +13,9 @@
  */
 
 require('dotenv').config({ path: '.env.local' });
+const { exec } = require('child_process');
+const { promisify } = require('util');
+const execAsync = promisify(exec);
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent';
@@ -56,9 +59,12 @@ class ContentGenerator {
    * Generiert einen Post für spezifische Plattform
    */
   async generatePost(platform, niche, products = []) {
+    // Store niche for fallback
+    this.niche = niche;
+
     const prompt = this.buildPrompt(platform, niche, products);
 
-    const response = await this.callGeminiAPI(prompt);
+    const response = await this.callGeminiAPI(prompt, platform);
     const parsed = this.parseResponse(response, platform);
 
     return {
@@ -140,36 +146,53 @@ Erstelle jetzt einen viralen ${platform.toUpperCase()} Post!
   }
 
   /**
-   * Ruft Gemini API auf
+   * Ruft Gemini API auf (mit curl für Proxy-Support)
    */
-  async callGeminiAPI(prompt) {
+  async callGeminiAPI(prompt, platform = 'generic') {
+    // Check if API key is configured
+    if (!this.apiKey || this.apiKey === 'your_gemini_api_key_here') {
+      console.log('⚠️  Gemini API key not configured, using fallback content');
+      return this.generateFallbackJSON(platform);
+    }
+
     try {
-      const response = await fetch(`${GEMINI_API_URL}?key=${this.apiKey}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: {
-            temperature: 0.9,
-            topK: 40,
-            topP: 0.95,
-            maxOutputTokens: 2048,
-          },
-        }),
+      const requestData = JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: {
+          temperature: 0.9,
+          topK: 40,
+          topP: 0.95,
+          maxOutputTokens: 2048,
+        },
       });
 
-      if (!response.ok) {
-        throw new Error(`Gemini API Error: ${response.status}`);
+      // Escape für Shell
+      const jsonData = requestData.replace(/'/g, "'\\''");
+
+      // curl statt fetch (Proxy-Support)
+      const curlCommand = `curl -s --location '${GEMINI_API_URL}?key=${this.apiKey}' \
+        --header 'Content-Type: application/json' \
+        --data '${jsonData}'`;
+
+      const { stdout, stderr } = await execAsync(curlCommand);
+
+      if (stderr && !stderr.includes('Trying')) {
+        console.error('Curl stderr:', stderr);
       }
 
-      const data = await response.json();
+      const data = JSON.parse(stdout);
+
+      if (data.error) {
+        throw new Error(data.error.message || 'API request failed');
+      }
+
       return data.candidates[0].content.parts[0].text;
 
     } catch (error) {
       console.error('Gemini API Error:', error.message);
 
       // Fallback: Einfacher Content ohne AI
-      return this.generateFallbackContent();
+      return this.generateFallbackJSON(platform);
     }
   }
 
@@ -241,13 +264,105 @@ Erstelle jetzt einen viralen ${platform.toUpperCase()} Post!
   }
 
   /**
-   * Fallback Content wenn API nicht verfügbar
+   * Generiert Fallback JSON (als String für parseResponse)
+   */
+  generateFallbackJSON(platform = 'generic') {
+    const niche = this.niche || 'Online Geld verdienen';
+    const nicheTag = niche.toLowerCase().replace(/\s+/g, '');
+
+    // Platform-spezifische Templates
+    const templates = {
+      tiktok: {
+        hooks: [
+          `🔥 ${niche} in 2025 - Das musst du wissen!`,
+          `💰 So verdienst du mit ${niche} Geld!`,
+          `Niemand spricht über ${niche} - bis jetzt!`,
+          `🚀 ${niche} für Anfänger - Einfach erklärt!`
+        ],
+        captions: [
+          `Die meisten machen ${niche} falsch! Hier ist die Strategie, die wirklich funktioniert. Ich zeige dir Schritt für Schritt wie du starten kannst. 💪`,
+          `Heute teile ich meine besten ${niche} Tipps, die mir geholfen haben erfolgreich zu werden. Diese Methode ist komplett kostenlos! 🎯`,
+          `Wenn du mit ${niche} anfangen willst, musst du diese 3 Dinge beachten. Im Detail erkläre ich alles im Video!`
+        ],
+        hashtags: [nicheTag, 'fyp', 'viral', 'geldverdienen', 'tutorial', 'tipps', 'erfolg', 'motivation', 'business', 'germany'],
+        cta: 'Link in Bio! 👆',
+        videoIdea: 'Hook in ersten 3 Sekunden, schnelle Cuts, Text-Overlay'
+      },
+      instagram: {
+        hooks: [
+          `✨ ${niche} - Meine ehrliche Erfahrung`,
+          `📊 ${niche} Strategie, die wirklich funktioniert`,
+          `💡 ${niche} für Anfänger - Der komplette Guide`,
+          `🎯 So starte ich heute mit ${niche}`
+        ],
+        captions: [
+          `Nach 6 Monaten ${niche} habe ich so viel gelernt! Heute teile ich meine wichtigsten Erkenntnisse mit dir. Swipe für alle Details! ➡️\n\nWas ich gelernt habe:\n✅ Diese Strategie funktioniert\n✅ Geduld ist der Schlüssel\n✅ Konsistenz zahlt sich aus\n\nHast du Fragen? Drop sie in die Comments! 💬`,
+          `${niche} komplett erklärt! 💪\n\nIch bekomme täglich Fragen dazu, also hier ist mein kompletter Guide für dich. Save diesen Post für später! 🔖\n\nSchritt für Schritt zeige ich dir, wie du anfängst und erfolgreich wirst.`,
+          `Die Wahrheit über ${niche} die niemand dir sagt... 👀\n\nIn diesem Carousel teile ich meine ehrliche Erfahrung nach monatelangem Testing. Das sind die echten Ergebnisse!`
+        ],
+        hashtags: [nicheTag, 'geldverdienen', 'business', 'erfolg', 'tipps', 'tutorial', 'motivation', 'selbstständig', 'entrepreneur', 'germany'],
+        cta: 'Link in Bio für mehr Details! 🔗',
+        videoIdea: 'Carousel Post mit 5-7 Slides, visuell ansprechend'
+      },
+      youtube: {
+        hooks: [
+          `${niche} - Der komplette Anfänger Guide 2025`,
+          `Wie ich mit ${niche} Geld verdiene (transparente Einblicke)`,
+          `${niche} Schritt für Schritt erklärt`,
+          `Die Wahrheit über ${niche} - Ehrlicher Erfahrungsbericht`
+        ],
+        captions: [
+          `In diesem Video zeige ich dir alles über ${niche}! 🎯\n\n📚 Timestamps:\n0:00 - Einleitung\n1:30 - Was ist ${niche}?\n4:15 - Wie funktioniert es?\n8:30 - Meine Erfahrungen\n12:00 - Tipps für Anfänger\n15:45 - Fazit\n\nWenn du mit ${niche} starten willst, ist dieses Video perfekt für dich. Ich teile alles was ich gelernt habe!\n\n🔗 Wichtige Links in der Beschreibung!\n\n✅ Kanal abonnieren für mehr Content\n💬 Fragen in die Comments\n👍 Like wenn hilfreich!`,
+          `${niche} komplett erklärt - von Anfang bis Erfolg! 💰\n\nIn diesem ausführlichen Tutorial zeige ich dir Schritt für Schritt wie du mit ${niche} anfängst und erfolgreich wirst.\n\nDas lernst du:\n✅ Die Grundlagen von ${niche}\n✅ Praktische Umsetzung\n✅ Häufige Fehler vermeiden\n✅ Meine besten Tipps\n✅ Tools & Ressourcen\n\nPerfekt für Anfänger und Fortgeschrittene!`
+        ],
+        hashtags: [nicheTag, 'tutorial', 'deutsch', 'geldverdienen'],
+        cta: '👉 Links in der Beschreibung!\nAbonnieren nicht vergessen! 🔔',
+        videoIdea: 'Ausführliches Tutorial Video mit Screen Recording, klare Struktur'
+      },
+      pinterest: {
+        hooks: [
+          `${niche} Tipps für 2025`,
+          `So startest du mit ${niche}`,
+          `${niche} Anfänger Guide`,
+          `${niche} - Die besten Strategien`
+        ],
+        captions: [
+          `Die besten ${niche} Tipps für Anfänger! Pin speichern und später umsetzen. Klick für den kompletten Guide! 📌`,
+          `${niche} leicht gemacht - mit dieser Strategie funktioniert es wirklich! Mehr Details auf dem Blog.`,
+          `Kompletter ${niche} Guide mit Schritt-für-Schritt Anleitung. Speichern und starten! 💪`
+        ],
+        hashtags: [nicheTag, 'geldverdienen', 'tipps', 'tutorial', 'anfänger'],
+        cta: 'Pin speichern & Link klicken! 📌',
+        videoIdea: 'Pin-Design: Vertikales Format, große Schrift, auffällige Farben'
+      }
+    };
+
+    const template = templates[platform] || templates['tiktok'];
+    const hookIndex = Math.floor(Math.random() * template.hooks.length);
+    const captionIndex = Math.floor(Math.random() * template.captions.length);
+
+    const fallbackContent = {
+      hook: template.hooks[hookIndex],
+      caption: template.captions[captionIndex],
+      hashtags: template.hashtags.slice(0, platform === 'instagram' ? 10 : 5),
+      cta: template.cta,
+      videoIdea: template.videoIdea,
+      bestTime: platform === 'tiktok' ? '18:00-20:00' : platform === 'instagram' ? '11:00-13:00' : '18:00',
+    };
+
+    // Return as JSON string for parseResponse
+    return '```json\n' + JSON.stringify(fallbackContent, null, 2) + '\n```';
+  }
+
+  /**
+   * Fallback Content wenn API nicht verfügbar (returns object)
    */
   generateFallbackContent() {
+    const niche = this.niche || 'Online Geld verdienen';
     return {
-      hook: `${this.niche} - Das musst du wissen! 👇`,
-      caption: `Heute teile ich mit dir die wichtigsten Tipps zu ${this.niche}. Diese Strategie hat mir geholfen, meine Ziele zu erreichen!`,
-      hashtags: [this.niche.toLowerCase().replace(/\s+/g, ''), 'tipps', 'tutorial', 'motivation'],
+      hook: `${niche} - Das musst du wissen! 👇`,
+      caption: `Heute teile ich mit dir die wichtigsten Tipps zu ${niche}. Diese Strategie hat mir geholfen, meine Ziele zu erreichen!`,
+      hashtags: [niche.toLowerCase().replace(/\s+/g, ''), 'tipps', 'tutorial', 'motivation'],
       cta: 'Link in Bio für mehr Infos! 🔗',
       videoIdea: 'Talking Head mit Text-Overlay',
       bestTime: '18:00',
@@ -376,7 +491,7 @@ Erstelle jetzt die Hashtag-Liste:
    * Fallback Hashtags
    */
   generateFallbackHashtags(niche) {
-    const base = niche.toLowerCase().replace(/\s+/g, '');
+    const base = (niche || 'geldverdienen').toLowerCase().replace(/\s+/g, '');
 
     return {
       trending: ['viral', 'fyp', 'trending', 'explore'],

@@ -1,0 +1,19 @@
+{
+  "date": "2025-11-05",
+  "cycleNumber": 4,
+  "metrics": {
+    "contentGenerated": 8,
+    "postsPublished": 0,
+    "followersGained": 0,
+    "clicksTracked": 0,
+    "conversions": 0,
+    "revenue": 0,
+    "cyclesCompleted": 3
+  },
+  "progress": {
+    "revenue": 0,
+    "goal": 5000,
+    "percentage": "0.0"
+  },
+  "uptime": "0h 0m"
+}

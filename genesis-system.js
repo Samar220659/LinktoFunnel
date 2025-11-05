@@ -26,6 +26,9 @@ const { ContentGenerator } = require('./ai-agent/agents/content-generator.js');
 const { createClient } = require('@supabase/supabase-js');
 const fs = require('fs').promises;
 const path = require('path');
+const { exec } = require('child_process');
+const { promisify } = require('util');
+const execAsync = promisify(exec);
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -381,7 +384,7 @@ class GenesisSystem {
   }
 
   /**
-   * 📱 SEND TELEGRAM REPORT
+   * 📱 SEND TELEGRAM REPORT (mit curl für Proxy-Support)
    */
   async sendTelegramReport(report) {
     const token = process.env.TELEGRAM_BOT_TOKEN;
@@ -406,15 +409,21 @@ ${report.progress.percentage >= 100 ? '🎉 GOAL ACHIEVED!' : ''}
 `;
 
     try {
-      await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          chat_id: chatId,
-          text: message,
-          parse_mode: 'HTML',
-        }),
+      const requestData = JSON.stringify({
+        chat_id: chatId,
+        text: message,
+        parse_mode: 'HTML',
       });
+
+      // Escape für Shell
+      const jsonData = requestData.replace(/'/g, "'\\''");
+
+      // curl statt fetch (Proxy-Support)
+      const curlCommand = `curl -s -X POST 'https://api.telegram.org/bot${token}/sendMessage' \
+        -H 'Content-Type: application/json' \
+        -d '${jsonData}'`;
+
+      await execAsync(curlCommand);
     } catch (error) {
       console.error('Telegram notification failed:', error.message);
     }

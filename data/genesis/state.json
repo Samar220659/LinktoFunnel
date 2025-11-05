@@ -1,0 +1,75 @@
+{
+  "version": "1.0.0",
+  "savedAt": "2025-11-05T18:05:29.287Z",
+  "metrics": {
+    "contentGenerated": 8,
+    "postsPublished": 0,
+    "followersGained": 0,
+    "clicksTracked": 0,
+    "conversions": 0,
+    "revenue": 0,
+    "cyclesCompleted": 4
+  },
+  "learningData": [
+    {
+      "date": "2025-11-05T17:59:23.324Z",
+      "insights": [
+        {
+          "platform": "TikTok",
+          "metric": "Engagement",
+          "value": "8.5%"
+        },
+        {
+          "platform": "Instagram",
+          "metric": "Reach",
+          "value": "12K"
+        }
+      ]
+    },
+    {
+      "date": "2025-11-05T18:00:57.370Z",
+      "insights": [
+        {
+          "platform": "TikTok",
+          "metric": "Engagement",
+          "value": "8.5%"
+        },
+        {
+          "platform": "Instagram",
+          "metric": "Reach",
+          "value": "12K"
+        }
+      ]
+    },
+    {
+      "date": "2025-11-05T18:03:45.111Z",
+      "insights": [
+        {
+          "platform": "TikTok",
+          "metric": "Engagement",
+          "value": "8.5%"
+        },
+        {
+          "platform": "Instagram",
+          "metric": "Reach",
+          "value": "12K"
+        }
+      ]
+    },
+    {
+      "date": "2025-11-05T18:05:29.197Z",
+      "insights": [
+        {
+          "platform": "TikTok",
+          "metric": "Engagement",
+          "value": "8.5%"
+        },
+        {
+          "platform": "Instagram",
+          "metric": "Reach",
+          "value": "12K"
+        }
+      ]
+    }
+  ]
+}
