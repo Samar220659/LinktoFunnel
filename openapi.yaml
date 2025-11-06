@@ -1,0 +1,272 @@
+openapi: 3.0.0
+info:
+  title: LinktoFunnel API
+  description: Zero-Budget Affiliate Automation System API
+  version: 1.0.0
+  contact:
+    email: samar220659@gmail.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:3000/api
+    description: Development Server
+  - url: https://your-domain.com/api
+    description: Production Server
+
+tags:
+  - name: PayPal
+    description: PayPal Payment Processing
+  - name: Content
+    description: Content Generation
+  - name: Analytics
+    description: Analytics & Tracking
+  - name: Auth
+    description: Authentication
+
+paths:
+  /paypal-webhook:
+    post:
+      tags:
+        - PayPal
+      summary: PayPal Webhook Handler
+      description: Verarbeitet PayPal Zahlungsbenachrichtigungen und liefert Produkt aus
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                orderID:
+                  type: string
+                  description: PayPal Order ID
+                  example: "7YH12345678901234"
+                details:
+                  type: object
+                  description: PayPal Order Details
+              required:
+                - orderID
+      responses:
+        '200':
+          description: Zahlung erfolgreich verarbeitet
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Payment processed successfully"
+                  data:
+                    type: object
+        '400':
+          description: Bad Request - Fehlende Parameter
+        '500':
+          description: Internal Server Error
+
+  /content/generate:
+    post:
+      tags:
+        - Content
+      summary: Content Generator
+      description: Generiert AI-basierten Content für Social Media
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                niche:
+                  type: string
+                  description: Content-Nische
+                  example: "Online Geld verdienen"
+                platform:
+                  type: string
+                  enum: [tiktok, instagram, youtube, pinterest]
+                  example: "tiktok"
+                products:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                      description:
+                        type: string
+              required:
+                - niche
+                - platform
+      responses:
+        '200':
+          description: Content erfolgreich generiert
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  platform:
+                    type: string
+                  hook:
+                    type: string
+                  caption:
+                    type: string
+                  hashtags:
+                    type: array
+                    items:
+                      type: string
+                  cta:
+                    type: string
+                  fullText:
+                    type: string
+        '401':
+          description: Unauthorized
+        '500':
+          description: Internal Server Error
+
+  /content/calendar:
+    get:
+      tags:
+        - Content
+      summary: Content Calendar
+      description: Generiert 30-Tage Content-Kalender
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: query
+          name: niche
+          schema:
+            type: string
+          required: true
+          description: Content-Nische
+          example: "Online Geld verdienen"
+      responses:
+        '200':
+          description: Kalender erfolgreich generiert
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    date:
+                      type: string
+                      format: date
+                    dayOfWeek:
+                      type: string
+                    theme:
+                      type: string
+                    platforms:
+                      type: array
+                      items:
+                        type: string
+                    status:
+                      type: string
+                      enum: [planned, in_progress, completed]
+        '401':
+          description: Unauthorized
+        '500':
+          description: Internal Server Error
+
+  /analytics/daily:
+    get:
+      tags:
+        - Analytics
+      summary: Daily Analytics
+      description: Holt tägliche Analytics-Daten
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: query
+          name: date
+          schema:
+            type: string
+            format: date
+          description: Datum (optional, default: heute)
+      responses:
+        '200':
+          description: Analytics Daten
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  date:
+                    type: string
+                  revenue:
+                    type: number
+                  costs:
+                    type: number
+                  profit:
+                    type: number
+                  conversions:
+                    type: integer
+                  clicks:
+                    type: integer
+                  conversionRate:
+                    type: number
+        '401':
+          description: Unauthorized
+
+  /auth/login:
+    post:
+      tags:
+        - Auth
+      summary: User Login
+      description: Authentifiziert Benutzer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  format: password
+              required:
+                - email
+                - password
+      responses:
+        '200':
+          description: Login erfolgreich
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                  user:
+                    type: object
+        '401':
+          description: Invalid credentials
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+        code:
+          type: integer
