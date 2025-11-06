@@ -171,6 +171,7 @@ CREATE TABLE IF NOT EXISTS rl_learning (
     log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'cyan');
 
     const workflow = [
+      { name: 'Social Media API Manager', agent: 'social-media-api-manager' },
       { name: 'Product Scout', agent: 'product-scout' },
       { name: 'Content Creator', agent: 'content-creator' },
       { name: 'Marketing', agent: 'marketing' },
@@ -197,10 +198,37 @@ CREATE TABLE IF NOT EXISTS rl_learning (
   }
 
   async executeAgent(agentName) {
-    // Placeholder: In production, this spawns actual agent scripts
     log(`   Running ${agentName}...`, 'blue');
 
-    // Simulate agent work
+    // Special handling for Social Media API Manager
+    if (agentName === 'social-media-api-manager') {
+      try {
+        const { SocialMediaAPIManager } = require('../agents/social-media-api-manager');
+        const manager = new SocialMediaAPIManager();
+
+        await manager.initialize();
+        await manager.syncAPIsToDatabase();
+        await manager.checkAllAPIs();
+        await manager.sendChangeNotifications();
+
+        return {
+          status: 'success',
+          timestamp: new Date().toISOString(),
+          metrics: {
+            executionTime: 5000,
+          }
+        };
+      } catch (err) {
+        log(`   ⚠️  API Manager error: ${err.message}`, 'yellow');
+        return {
+          status: 'error',
+          error: err.message,
+          timestamp: new Date().toISOString(),
+        };
+      }
+    }
+
+    // Placeholder: In production, this spawns actual agent scripts
     await new Promise(resolve => setTimeout(resolve, 1000));
 
     return {

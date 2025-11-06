@@ -14,6 +14,9 @@
  * /optimize - Run RL optimization
  * /products - List affiliate products
  * /funnel [product] - Create funnel
+ * /apis - Liste aller Social Media APIs
+ * /apis_health - API Health Status
+ * /apis_changes - API Änderungen
  * /help - All commands
  */
 
@@ -123,6 +126,15 @@ class TelegramBot {
 
       case '/funnel':
         return this.cmdFunnel(chatId, args);
+
+      case '/apis':
+        return this.cmdAPIs(chatId);
+
+      case '/apis_health':
+        return this.cmdAPIsHealth(chatId);
+
+      case '/apis_changes':
+        return this.cmdAPIsChanges(chatId);
 
       case '/help':
         return this.cmdHelp(chatId);
@@ -420,6 +432,165 @@ Use /stats for detailed analytics
     return this.sendMessage(chatId, result);
   }
 
+  async cmdAPIs(chatId) {
+    await this.sendMessage(chatId, '📡 Loading API registry...');
+
+    try {
+      const { data: apis, error } = await supabase
+        .from('social_media_apis')
+        .select('*')
+        .order('platform', { ascending: true });
+
+      if (error) throw error;
+
+      if (!apis || apis.length === 0) {
+        return this.sendMessage(chatId, '⚠️ Keine APIs registriert. Führe zuerst den API Manager aus.');
+      }
+
+      // Group by platform
+      const byPlatform = {};
+      for (const api of apis) {
+        if (!byPlatform[api.platform]) {
+          byPlatform[api.platform] = [];
+        }
+        byPlatform[api.platform].push(api);
+      }
+
+      let message = '<b>📡 SOCIAL MEDIA APIs</b>\n━━━━━━━━━━━━━━━━━━━━━━\n\n';
+
+      for (const [platform, platformAPIs] of Object.entries(byPlatform)) {
+        message += `<b>📱 ${platform.toUpperCase()}</b>\n`;
+        for (const api of platformAPIs) {
+          const statusIcon = api.status === 'active' ? '✅' : '⚠️';
+          message += `├─ ${statusIcon} ${api.api_name}\n`;
+          message += `│  └─ v${api.version}\n`;
+        }
+        message += '\n';
+      }
+
+      message += `━━━━━━━━━━━━━━━━━━━━━━\n`;
+      message += `📊 Total: ${apis.length} APIs\n`;
+      message += `\n💡 Use /apis_health for health status`;
+
+      return this.sendMessage(chatId, message);
+
+    } catch (error) {
+      return this.sendMessage(chatId, `❌ Error: ${error.message}`);
+    }
+  }
+
+  async cmdAPIsHealth(chatId) {
+    await this.sendMessage(chatId, '🔍 Checking API health...');
+
+    try {
+      const { data: apis, error: apiError } = await supabase
+        .from('social_media_apis')
+        .select('id, platform, api_name');
+
+      if (apiError) throw apiError;
+
+      if (!apis || apis.length === 0) {
+        return this.sendMessage(chatId, '⚠️ Keine APIs registriert.');
+      }
+
+      // Get recent health checks
+      const apiIds = apis.map(a => a.id);
+      const { data: healthChecks, error: healthError } = await supabase
+        .from('social_media_api_health')
+        .select('*')
+        .in('api_id', apiIds)
+        .order('check_timestamp', { ascending: false });
+
+      if (healthError) throw healthError;
+
+      let message = '<b>🔍 API HEALTH STATUS</b>\n━━━━━━━━━━━━━━━━━━━━━━\n\n';
+
+      for (const api of apis) {
+        const checks = (healthChecks || []).filter(h => h.api_id === api.id);
+        const latestCheck = checks[0];
+        const last24h = checks.filter(h =>
+          new Date(h.check_timestamp) > new Date(Date.now() - 24 * 60 * 60 * 1000)
+        );
+
+        const availableCount = last24h.filter(h => h.is_available).length;
+        const uptime = last24h.length > 0
+          ? ((availableCount / last24h.length) * 100).toFixed(1)
+          : 'N/A';
+
+        const statusIcon = latestCheck?.is_available ? '✅' : '❌';
+
+        message += `${statusIcon} <b>${api.api_name}</b>\n`;
+        message += `├─ Platform: ${api.platform}\n`;
+        message += `├─ Uptime 24h: ${uptime}%\n`;
+
+        if (latestCheck) {
+          message += `├─ Response: ${latestCheck.response_time_ms}ms\n`;
+          message += `└─ Last Check: ${new Date(latestCheck.check_timestamp).toLocaleTimeString('de-DE')}\n`;
+        } else {
+          message += `└─ No health data\n`;
+        }
+
+        message += '\n';
+      }
+
+      message += `━━━━━━━━━━━━━━━━━━━━━━`;
+
+      return this.sendMessage(chatId, message);
+
+    } catch (error) {
+      return this.sendMessage(chatId, `❌ Error: ${error.message}`);
+    }
+  }
+
+  async cmdAPIsChanges(chatId) {
+    await this.sendMessage(chatId, '📋 Loading API changes...');
+
+    try {
+      const { data: changes, error } = await supabase
+        .from('social_media_api_changes')
+        .select('*, social_media_apis(platform, api_name)')
+        .order('detected_at', { ascending: false })
+        .limit(10);
+
+      if (error) throw error;
+
+      if (!changes || changes.length === 0) {
+        return this.sendMessage(chatId, '✅ Keine API-Änderungen gefunden.');
+      }
+
+      let message = '<b>📋 API ÄNDERUNGEN</b>\n━━━━━━━━━━━━━━━━━━━━━━\n\n';
+
+      for (const change of changes) {
+        const severityIcon = {
+          low: 'ℹ️',
+          medium: '⚠️',
+          high: '🚨',
+          critical: '🔴'
+        }[change.severity] || 'ℹ️';
+
+        const ackIcon = change.acknowledged ? '✓' : '○';
+
+        message += `${severityIcon} <b>${change.social_media_apis?.api_name}</b> ${ackIcon}\n`;
+        message += `├─ Type: ${change.change_type}\n`;
+        message += `├─ ${change.description}\n`;
+        message += `└─ ${new Date(change.detected_at).toLocaleDateString('de-DE')}\n`;
+        message += '\n';
+      }
+
+      message += `━━━━━━━━━━━━━━━━━━━━━━\n`;
+
+      const unacknowledged = changes.filter(c => !c.acknowledged).length;
+      if (unacknowledged > 0) {
+        message += `⚠️ ${unacknowledged} unbestätigte Änderungen\n`;
+      }
+
+      return this.sendMessage(chatId, message);
+
+    } catch (error) {
+      return this.sendMessage(chatId, `❌ Error: ${error.message}`);
+    }
+  }
+
   async cmdHelp(chatId) {
     const help = `
 <b>🤖 TELEGRAM BOT COMMANDS</b>
@@ -442,6 +613,11 @@ Use /stats for detailed analytics
 <b>🧠 Optimization</b>
 /optimize - Run RL optimization
 
+<b>📡 API Management</b>
+/apis - Liste aller APIs
+/apis_health - Health Status
+/apis_changes - API Änderungen
+
 <b>ℹ️ Help</b>
 /help - This message
 
@@ -450,6 +626,7 @@ Use /stats for detailed analytics
 • /generate tiktok
 • /post instagram
 • /funnel 1
+• /apis_health
 
 💡 More features coming soon!
     `;
@@ -508,6 +685,30 @@ Revenue: €${data.revenue}
 
 ━━━━━━━━━━━━━━━━
 ${data.trend}
+        `;
+        break;
+
+      case 'api_change':
+        const severityIcon = {
+          low: 'ℹ️',
+          medium: '⚠️',
+          high: '🚨',
+          critical: '🔴'
+        }[data.severity] || 'ℹ️';
+
+        message = `
+${severityIcon} <b>API ÄNDERUNG ERKANNT!</b>
+
+API: ${data.apiName}
+Platform: ${data.platform}
+Type: ${data.changeType}
+
+${data.description}
+
+━━━━━━━━━━━━━━━━
+Severity: ${data.severity.toUpperCase()}
+
+Use /apis_changes for details
         `;
         break;
     }
