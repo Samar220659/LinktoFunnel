@@ -10,11 +10,19 @@
  * - Super-Seller Persona
  * - Psychologische Trigger
  * - Trend-Integration
+ * - ✅ LEGAL COMPLIANCE (DSGVO, UWG, EU AI Act, NetzDG)
  */
 
 require('dotenv').config({ path: '.env.local' });
 const { createClient } = require('@supabase/supabase-js');
 const fs = require('fs');
+
+// ===== LEGAL COMPLIANCE =====
+const {
+  makeCompliant,
+  hasAffiliateLinks,
+  generateComplianceReport
+} = require('../utils/legal-compliance');
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -194,6 +202,51 @@ WICHTIG:
         console.log('\n✅ Script generiert!');
         console.log(`   Hook: "${script.hook.substring(0, 50)}..."`);
         console.log(`   Hashtags: ${script.hashtags?.length || 0}`);
+
+        // ===== LEGAL COMPLIANCE =====
+        // Baue vollständigen Text für Compliance-Check
+        const fullText = `${script.hook}\n\n${script.value}\n\n${script.proof}\n\n${script.cta}`;
+
+        // Prüfe auf Affiliate-Links (Produkt ist immer Affiliate!)
+        const hasAffiliate = true; // Alle DigiStore24 Produkte sind Affiliate
+
+        // Compliance anwenden
+        const complianceResult = makeCompliant(fullText, {
+          platform: platform,
+          hasAffiliateLinks: hasAffiliate,
+          isAIGenerated: true,
+          disclosureStyle: platform === 'tiktok' ? 'minimal' : 'short',
+          aiDisclosurePosition: 'social',
+          aiModel: 'gemini-pro',
+          strict: true
+        });
+
+        // Check ob Content blockiert wurde
+        if (!complianceResult.success) {
+          console.error('❌ CONTENT BLOCKED BY LEGAL COMPLIANCE:', complianceResult.error);
+          console.error('Issues:', complianceResult.issues);
+          return null;
+        }
+
+        // Warnungen loggen
+        const warnings = complianceResult.issues.filter(i => i.severity === 'warning');
+        if (warnings.length > 0) {
+          console.log(`⚠️  ${warnings.length} compliance warnings:`);
+          warnings.forEach(w => console.log(`   - ${w.message}`));
+        }
+
+        // Compliance Report
+        const report = generateComplianceReport(complianceResult);
+        console.log('✅ Legal Compliance:', {
+          platform,
+          hasAffiliate,
+          contentLength: report.contentLength,
+          warnings: report.warnings
+        });
+
+        // Füge compliant Text zum Script hinzu
+        script.fullTextCompliant = complianceResult.content;
+        script.complianceReport = report;
 
         return {
           product_id: product.id,

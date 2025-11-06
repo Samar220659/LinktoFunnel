@@ -10,12 +10,20 @@
  * - Content-Kalender für 30 Tage
  * - A/B Testing Varianten
  * - Trending Topics Research
+ * - ✅ LEGAL COMPLIANCE (DSGVO, UWG, EU AI Act, NetzDG)
  */
 
 require('dotenv').config({ path: '.env.local' });
 const { exec } = require('child_process');
 const { promisify } = require('util');
 const execAsync = promisify(exec);
+
+// ===== LEGAL COMPLIANCE =====
+const {
+  makeCompliant,
+  hasAffiliateLinks,
+  generateComplianceReport
+} = require('../utils/legal-compliance');
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent';
@@ -216,7 +224,7 @@ Erstelle jetzt einen viralen ${platform.toUpperCase()} Post!
           cta: parsed.cta || '',
           videoIdea: parsed.videoIdea || '',
           bestTime: parsed.bestTime || '18:00',
-          fullText: this.buildFullPost(parsed),
+          fullText: this.buildFullPost(parsed, platform), // ✅ Platform für Legal Compliance
         };
       }
 
@@ -231,11 +239,68 @@ Erstelle jetzt einen viralen ${platform.toUpperCase()} Post!
 
   /**
    * Baut den vollständigen Post zusammen
+   * ✅ LEGAL COMPLIANCE: Automatische Kennzeichnung (DSGVO, UWG, EU AI Act)
    */
-  buildFullPost(parsed) {
+  buildFullPost(parsed, platform = 'default') {
     const { hook, caption, hashtags, cta } = parsed;
 
-    return `${hook}\n\n${caption}\n\n${cta}\n\n${hashtags.map(h => `#${h}`).join(' ')}`;
+    // 1. Baue Original-Post
+    let fullText = `${hook}\n\n${caption}\n\n${cta}\n\n${hashtags.map(h => `#${h}`).join(' ')}`;
+
+    // 2. Prüfe auf Affiliate-Links
+    const containsAffiliateLinks = hasAffiliateLinks(fullText);
+
+    // 3. Legal Compliance anwenden
+    const complianceResult = makeCompliant(fullText, {
+      platform: platform,
+      hasAffiliateLinks: containsAffiliateLinks,
+      isAIGenerated: true, // Immer true, da von Gemini AI generiert
+      disclosureStyle: 'short', // Kurz für Social Media
+      aiDisclosurePosition: 'social', // Am Ende für Social Media
+      aiModel: 'gemini-pro',
+      strict: true // Blockiere illegale Inhalte
+    });
+
+    // 4. Prüfe Compliance
+    if (!complianceResult.success) {
+      console.error('⚠️  CONTENT BLOCKED BY LEGAL COMPLIANCE:', complianceResult.error);
+      console.error('Issues:', complianceResult.issues);
+
+      // Fallback: Sichere Default-Message
+      return this.getComplianceFallbackMessage(platform);
+    }
+
+    // 5. Warnungen loggen (auch wenn approved)
+    if (complianceResult.issues && complianceResult.issues.length > 0) {
+      const warnings = complianceResult.issues.filter(i => i.severity === 'warning');
+      if (warnings.length > 0) {
+        console.log(`⚠️  ${warnings.length} compliance warnings:`);
+        warnings.forEach(w => console.log(`   - ${w.message}`));
+      }
+    }
+
+    // 6. Compliance Report generieren
+    const report = generateComplianceReport(complianceResult);
+    console.log('✅ Legal Compliance:', {
+      platform,
+      hasAffiliate: containsAffiliateLinks,
+      contentLength: report.contentLength,
+      warnings: report.warnings,
+      criticalIssues: report.criticalIssues
+    });
+
+    // 7. Rückgabe des compliant Content
+    return complianceResult.content;
+  }
+
+  /**
+   * Fallback-Message wenn Content blockiert wurde
+   */
+  getComplianceFallbackMessage(platform) {
+    return `🤖 Automatisch generierter Content\n\n` +
+           `Dieser Beitrag wurde aus Compliance-Gründen blockiert.\n\n` +
+           `Bitte prüfen Sie die Logs für Details.\n\n` +
+           `#ContentCompliance #DSGVO`;
   }
 
   /**
