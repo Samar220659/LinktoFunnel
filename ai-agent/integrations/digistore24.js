@@ -13,6 +13,9 @@
 
 require('dotenv').config({ path: '.env.local' });
 
+// ✅ PRODUCTION: Retry logic + timeout handling
+const { fetchWithRetry } = require('../utils/api-helper');
+
 const DIGISTORE24_API_KEY = process.env.DIGISTORE24_API_KEY;
 const API_BASE_URL = 'https://www.digistore24.com/api/call';
 
@@ -29,17 +32,28 @@ class Digistore24Client {
     };
 
     try {
-      const response = await fetch(API_BASE_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+      // ✅ Use fetchWithRetry with exponential backoff
+      const response = await fetchWithRetry(
+        API_BASE_URL,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(requestData),
         },
-        body: JSON.stringify(requestData),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
+        {
+          maxRetries: 3,
+          timeoutMs: 15000, // 15s timeout for API calls
+          initialDelayMs: 1000,
+          onRetry: (attempt, maxRetries, delay, error) => {
+            console.warn(
+              `⚠️  Digistore24 API retry (${attempt}/${maxRetries}): ${error.message}. ` +
+              `Waiting ${delay}ms...`
+            );
+          },
+        }
+      );
 
       const data = await response.json();
 
@@ -50,7 +64,7 @@ class Digistore24Client {
       return data.data;
 
     } catch (error) {
-      console.error(`Digistore24 API Error: ${error.message}`);
+      console.error(`❌ Digistore24 API Error: ${error.message}`);
       throw error;
     }
   }
@@ -169,7 +183,8 @@ class Digistore24Client {
     const products = await this.searchProducts('', category, 100);
 
     // Bewerte Produkte nach Conversion-Potential
-    const analyzed = await Promise.all(
+    // ✅ PRODUCTION: Use Promise.allSettled to prevent batch failure
+    const results = await Promise.allSettled(
       products.map(async (product) => {
         try {
           const stats = await this.getProductStats(product.product_id);
@@ -190,6 +205,17 @@ class Digistore24Client {
         }
       })
     );
+
+    // Extract successful results and log any failures
+    const analyzed = results
+      .filter(result => {
+        if (result.status === 'rejected') {
+          console.warn(`⚠️  Product analysis failed: ${result.reason?.message || result.reason}`);
+          return false;
+        }
+        return true;
+      })
+      .map(result => result.value);
 
     // Sortiere nach Score
     return analyzed.sort((a, b) => b.score - a.score);

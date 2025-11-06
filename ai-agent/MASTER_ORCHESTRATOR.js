@@ -17,6 +17,18 @@
  */
 
 require('dotenv').config({ path: '.env.local' });
+
+// ✅ PHASE 1: Environment Validation FIRST!
+const { validateEnvironment } = require('./utils/env-validator');
+const { setupGracefulShutdown, createShutdownHandler } = require('./utils/shutdown-handler');
+
+try {
+  validateEnvironment(); // Throws if validation fails
+} catch (error) {
+  console.error('\n💥 STARTUP FAILED:', error.message);
+  process.exit(1);
+}
+
 const { createClient } = require('@supabase/supabase-js');
 const { Digistore24Client } = require('./integrations/digistore24');
 const { ZZLobbyBridge } = require('./integrations/zz-lobby-bridge');
@@ -456,10 +468,35 @@ async function main() {
   await twin.runDailyAutomation();
 
   log('\n💰 Passives Einkommen läuft! System im Autopilot-Modus.\n', 'green');
+
+  return twin; // Return for graceful shutdown
 }
 
 if (require.main === module) {
-  main().catch(error => {
+  // ✅ Setup graceful shutdown
+  let twinInstance = null;
+
+  setupGracefulShutdown(async () => {
+    log('Saving state before shutdown...', 'yellow');
+
+    if (twinInstance && twinInstance.state) {
+      // Save final state
+      await supabase.from('system_state').upsert({
+        id: 'master_orchestrator',
+        state: twinInstance.state,
+        updated_at: new Date().toISOString(),
+      }).catch(err => {
+        console.error('Failed to save state:', err.message);
+      });
+    }
+
+    log('Shutdown complete!', 'green');
+  });
+
+  // Run main
+  main().then(twin => {
+    twinInstance = twin;
+  }).catch(error => {
     log(`\n💥 Critical Error: ${error.message}\n`, 'red');
     process.exit(1);
   });

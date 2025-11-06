@@ -16,6 +16,17 @@
  */
 
 require('dotenv').config({ path: '.env.local' });
+
+// ✅ PHASE 1: Environment Validation FIRST!
+const { validateEnvironment } = require('./utils/env-validator');
+
+try {
+  validateEnvironment();
+} catch (error) {
+  console.error('\n💥 STARTUP FAILED:', error.message);
+  process.exit(1);
+}
+
 const { DigitalTwin } = require('./MASTER_ORCHESTRATOR');
 const { ViralContentCreator } = require('./agents/viral-content-creator');
 const { CrossPoster } = require('./agents/cross-poster');

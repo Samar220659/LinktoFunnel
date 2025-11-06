@@ -14,12 +14,23 @@
 
 require('dotenv').config({ path: '.env.local' });
 
-// GetResponse API Configuration
-const GETRESPONSE_API_KEY = 'dmg18fztw7ecpfyhhfeallh6hdske13q';
-const TELEGRAM_CHAT_ID = '6982601388';
+// ✅ PRODUCTION: Retry logic + timeout handling
+const { fetchWithRetry } = require('../utils/api-helper');
+
+// ⚠️ SECURITY: Load from environment variables, never hardcode!
+const GETRESPONSE_API_KEY = process.env.GETRESPONSE_API_KEY;
+const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
 
 class ZZLobbyBridge {
   constructor() {
+    // Validate required environment variables
+    if (!process.env.GETRESPONSE_API_KEY) {
+      throw new Error('GETRESPONSE_API_KEY environment variable is required');
+    }
+    if (!process.env.TELEGRAM_CHAT_ID) {
+      throw new Error('TELEGRAM_CHAT_ID environment variable is required');
+    }
+
     this.getresponseApiKey = GETRESPONSE_API_KEY;
     this.telegramChatId = TELEGRAM_CHAT_ID;
     this.telegramBotToken = process.env.TELEGRAM_BOT_TOKEN || '';
@@ -43,17 +54,23 @@ class ZZLobbyBridge {
     }
 
     try {
-      const response = await fetch(url, options);
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`GetResponse API Error: ${response.status} - ${errorText}`);
-      }
+      // ✅ Use fetchWithRetry with exponential backoff
+      const response = await fetchWithRetry(url, options, {
+        maxRetries: 3,
+        timeoutMs: 10000,
+        initialDelayMs: 1000,
+        onRetry: (attempt, maxRetries, delay, error) => {
+          console.warn(
+            `⚠️  GetResponse API retry (${attempt}/${maxRetries}): ${error.message}. ` +
+            `Waiting ${delay}ms...`
+          );
+        },
+      });
 
       return await response.json();
 
     } catch (error) {
-      console.error(`GetResponse Request Failed: ${error.message}`);
+      console.error(`❌ GetResponse Request Failed: ${error.message}`);
       throw error;
     }
   }
