@@ -1,0 +1,280 @@
+{
+  "digistore24": {
+    "links": [
+      {
+        "id": "link_1",
+        "name": "Checkout DS24 - Produkt 580935",
+        "url": "https://www.checkout-ds24.com/redir/580935/Samarkande/",
+        "niche": "Online Geld verdienen",
+        "commission": 50,
+        "price": 97,
+        "category": "digital_products",
+        "performance": {
+          "clicks": 0,
+          "conversions": 0,
+          "revenue": 0,
+          "conversionRate": 0
+        },
+        "enabled": true
+      },
+      {
+        "id": "link_2",
+        "name": "Checkout DS24 - Produkt 580934",
+        "url": "https://www.checkout-ds24.com/redir/580934/Samarkande/",
+        "niche": "Affiliate Marketing",
+        "commission": 70,
+        "price": 147,
+        "category": "courses",
+        "performance": {
+          "clicks": 0,
+          "conversions": 0,
+          "revenue": 0,
+          "conversionRate": 0
+        },
+        "enabled": true
+      },
+      {
+        "id": "link_3",
+        "name": "Checkout DS24 - Produkt 547379",
+        "url": "https://www.checkout-ds24.com/redir/547379/Samarkande/",
+        "niche": "Social Media Marketing",
+        "commission": 40,
+        "price": 67,
+        "category": "tools",
+        "performance": {
+          "clicks": 0,
+          "conversions": 0,
+          "revenue": 0,
+          "conversionRate": 0
+        },
+        "enabled": true
+      },
+      {
+        "id": "link_4",
+        "name": "Affiliate Secrets Blackbook",
+        "url": "https://marketing365.online/affiliate-secrets-blackbook/#aff=Samarkande",
+        "niche": "Affiliate Marketing",
+        "commission": 60,
+        "price": 127,
+        "category": "courses",
+        "performance": {
+          "clicks": 0,
+          "conversions": 0,
+          "revenue": 0,
+          "conversionRate": 0
+        },
+        "enabled": true
+      },
+      {
+        "id": "link_5",
+        "name": "Monster Traffic Strategien",
+        "url": "https://marketing365.online/monster-traffic-strategien/#aff=Samarkande",
+        "niche": "Traffic Generation",
+        "commission": 55,
+        "price": 97,
+        "category": "courses",
+        "performance": {
+          "clicks": 0,
+          "conversions": 0,
+          "revenue": 0,
+          "conversionRate": 0
+        },
+        "enabled": true
+      },
+      {
+        "id": "link_6",
+        "name": "Das WordPress Kompendium",
+        "url": "https://marketing365.online/das-wordpress-kompendium/#aff=Samarkande",
+        "niche": "Website Creation",
+        "commission": 45,
+        "price": 77,
+        "category": "ebooks",
+        "performance": {
+          "clicks": 0,
+          "conversions": 0,
+          "revenue": 0,
+          "conversionRate": 0
+        },
+        "enabled": true
+      },
+      {
+        "id": "link_7",
+        "name": "Webseiten Komplettpaket",
+        "url": "https://marketing365.online/webseiten-komplettpaket/#aff=Samarkande",
+        "niche": "Website Creation",
+        "commission": 80,
+        "price": 197,
+        "category": "software",
+        "performance": {
+          "clicks": 0,
+          "conversions": 0,
+          "revenue": 0,
+          "conversionRate": 0
+        },
+        "enabled": true
+      },
+      {
+        "id": "link_8",
+        "name": "42 Monster Email Vorlagen",
+        "url": "https://marketing365.online/42-monster-email-vorlagen/#aff=Samarkande",
+        "niche": "Email Marketing",
+        "commission": 30,
+        "price": 37,
+        "category": "templates",
+        "performance": {
+          "clicks": 0,
+          "conversions": 0,
+          "revenue": 0,
+          "conversionRate": 0
+        },
+        "enabled": true
+      },
+      {
+        "id": "link_9",
+        "name": "Digistore24 - Produkt 411008",
+        "url": "https://www.digistore24.com/redir/411008/Samarkande/",
+        "niche": "Online Business",
+        "commission": 65,
+        "price": 127,
+        "category": "courses",
+        "performance": {
+          "clicks": 0,
+          "conversions": 0,
+          "revenue": 0,
+          "conversionRate": 0
+        },
+        "enabled": true
+      },
+      {
+        "id": "link_10",
+        "name": "Digistore24 - Produkt 526734",
+        "url": "https://www.digistore24.com/redir/526734/Samarkande/",
+        "niche": "Digital Marketing",
+        "commission": 50,
+        "price": 87,
+        "category": "courses",
+        "performance": {
+          "clicks": 0,
+          "conversions": 0,
+          "revenue": 0,
+          "conversionRate": 0
+        },
+        "enabled": true
+      },
+      {
+        "id": "link_11",
+        "name": "Digistore24 - Produkt 528678",
+        "url": "https://www.digistore24.com/redir/528678/Samarkande/",
+        "niche": "Social Media Growth",
+        "commission": 40,
+        "price": 67,
+        "category": "courses",
+        "performance": {
+          "clicks": 0,
+          "conversions": 0,
+          "revenue": 0,
+          "conversionRate": 0
+        },
+        "enabled": true
+      },
+      {
+        "id": "link_12",
+        "name": "Digistore24 - Produkt 355316",
+        "url": "https://www.digistore24.com/redir/355316/Samarkande/",
+        "niche": "Passive Income",
+        "commission": 55,
+        "price": 97,
+        "category": "courses",
+        "performance": {
+          "clicks": 0,
+          "conversions": 0,
+          "revenue": 0,
+          "conversionRate": 0
+        },
+        "enabled": true
+      },
+      {
+        "id": "link_13",
+        "name": "Abnehmen Ohne Diät",
+        "url": "https://produkte.60daydreambody.com/abnehmenohnediaet/#aff=Samarkande",
+        "niche": "Health & Fitness",
+        "commission": 75,
+        "price": 147,
+        "category": "health",
+        "performance": {
+          "clicks": 0,
+          "conversions": 0,
+          "revenue": 0,
+          "conversionRate": 0
+        },
+        "enabled": true
+      },
+      {
+        "id": "link_14",
+        "name": "Claudia Caldwell - OTO",
+        "url": "https://www.claudiacaldwell.com/oto-uf61a?el=splittest-1214-bradflow-control#aff=Samarkande",
+        "niche": "Relationship & Dating",
+        "commission": 90,
+        "price": 197,
+        "category": "courses",
+        "performance": {
+          "clicks": 0,
+          "conversions": 0,
+          "revenue": 0,
+          "conversionRate": 0
+        },
+        "enabled": true
+      },
+      {
+        "id": "link_15",
+        "name": "Reich mit Rohstoffen",
+        "url": "https://www.sharedeals.de/reich_mit_rohstoffen_geschenk/#aff=Samarkande",
+        "niche": "Investment & Finance",
+        "commission": 100,
+        "price": 247,
+        "category": "high_ticket",
+        "performance": {
+          "clicks": 0,
+          "conversions": 0,
+          "revenue": 0,
+          "conversionRate": 0
+        },
+        "enabled": true
+      }
+    ],
+    "strategy": {
+      "rotation": "performance_based",
+      "testPhase": {
+        "enabled": true,
+        "clicks": 100,
+        "description": "Teste alle Links mit je 100 Klicks, dann optimiere auf beste Performer"
+      },
+      "nicheMatching": {
+        "enabled": true,
+        "description": "Wähle Affiliate Link basierend auf Content-Nische"
+      },
+      "priceOptimization": {
+        "enabled": true,
+        "strategy": "start_low_ticket",
+        "description": "Starte mit günstigen Produkten (€37-€67) für höhere Conversion"
+      }
+    },
+    "fallback": {
+      "url": "https://ai-automation-blueprint.onrender.com",
+      "description": "Eigene Landing Page als Fallback"
+    }
+  },
+  "tracking": {
+    "enabled": true,
+    "utmSource": "genesis_system",
+    "utmMedium": "social_media",
+    "platforms": {
+      "tiktok": "utm_campaign=tiktok",
+      "instagram": "utm_campaign=instagram",
+      "youtube": "utm_campaign=youtube",
+      "pinterest": "utm_campaign=pinterest"
+    }
+  },
+  "lastUpdated": "2025-11-06T11:00:00.000Z",
+  "notes": "15 echte Affiliate Links von Samarkande integriert - bereit für Revenue Generation! 💰"
+}

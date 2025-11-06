@@ -22,6 +22,9 @@ const execAsync = promisify(exec);
 // Konfiguration aus .env.local
 require('dotenv').config({ path: path.join(__dirname, '../../.env.local') });
 
+// Affiliate Manager
+const { AffiliateManager } = require('../agents/affiliate-manager.js');
+
 class SocialMediaPoster {
   constructor() {
     this.platforms = {
