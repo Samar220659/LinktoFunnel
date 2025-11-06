@@ -30,36 +30,6 @@ export default function Widerruf() {
 
           {/* Important Notice */}
           <div className="prose prose-lg max-w-none">
-            <p className="bg-red-50 border-l-4 border-red-400 p-4 my-4">
-              <strong>⚠️ KRITISCH:</strong> Eine fehlerhafte oder fehlende Widerrufsbelehrung kann teuer werden!
-              <br />
-              <br />
-              <strong>Folge:</strong> Widerrufsfrist verlängert sich auf 12 Monate + 14 Tage
-              <br />
-              <strong>Gefahr:</strong> Kunden könnten auch nach Monaten noch widerrufen
-              <br />
-              <br />
-              Nutzen Sie offizielle Muster:
-              <ul className="mt-2 space-y-1">
-                <li>
-                  <a href="https://www.haendlerbund.de/de/downloads/muster-widerrufsbelehrung" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
-                    Händlerbund Muster-Widerrufsbelehrung
-                  </a>
-                </li>
-                <li>
-                  <a href="https://www.ihk.de/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
-                    IHK Widerrufsbelehrung
-                  </a>
-                </li>
-              </ul>
-            </p>
-
-            {/*
-              ============================================================
-              ERSETZEN SIE DIESEN BEREICH MIT IHRER ECHTEN WIDERRUFSBELEHRUNG
-              ============================================================
-            */}
-
             <div className="bg-gray-100 p-6 rounded-lg my-6">
               <h2>Widerrufsrecht</h2>
 
@@ -82,10 +52,11 @@ export default function Widerruf() {
                 Um Ihr Widerrufsrecht auszuüben, müssen Sie uns:
               </p>
               <div className="bg-white p-4 rounded border border-gray-300 my-4">
-                <p className="font-semibold">[Ihr Firmenname]</p>
-                <p>[Ihre Adresse]</p>
-                <p>E-Mail: [Ihre E-Mail]</p>
-                <p>Telefon: [Ihre Telefonnummer]</p>
+                <p className="font-semibold">Daniel Oettel</p>
+                <p>Pekinger Str. 5</p>
+                <p>06712 Zeitz</p>
+                <p>Deutschland</p>
+                <p>E-Mail: a22061981@gmx.de</p>
               </div>
 
               <p>

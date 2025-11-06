@@ -37,26 +37,6 @@ export default function Datenschutz() {
 
           {/* Important Notice */}
           <div className="prose prose-lg max-w-none">
-            <p className="bg-yellow-50 border-l-4 border-yellow-400 p-4 my-4">
-              <strong>⚠️ WICHTIG:</strong> Ersetzen Sie diesen Platzhalter-Text mit Ihrer echten Datenschutzerklärung!
-              <br />
-              <br />
-              Nutzen Sie den kostenlosen Generator:
-              <a href="https://datenschutz-generator.de/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline ml-1">
-                datenschutz-generator.de
-              </a>
-              <br />
-              <br />
-              <strong>Geben Sie ALLE genutzten Tools an:</strong> Google Analytics, Supabase, Buffer, Ayrshare,
-              PayPal, Telegram, alle Social Media APIs, etc.
-            </p>
-
-            {/*
-              ============================================================
-              ERSETZEN SIE DIESEN BEREICH MIT IHRER ECHTEN DATENSCHUTZERKLÄRUNG
-              ============================================================
-            */}
-
             <div className="bg-gray-100 p-6 rounded-lg my-6">
               <h2>1. Datenschutz auf einen Blick</h2>
 
@@ -105,7 +85,13 @@ export default function Datenschutz() {
                 die auf dieser Website erfasst werden, werden auf den Servern des Hosters gespeichert.
               </p>
               <p>
-                <strong>[HIER HOSTING-ANBIETER EINTRAGEN: Railway, Render, Vercel, etc.]</strong>
+                <strong>Hosting-Anbieter: Render.com</strong>
+                <br />
+                Render Services, Inc., 525 Brannan Street, San Francisco, CA 94107, USA
+                <br />
+                Die Server befinden sich in den USA. Render ist zertifiziert nach EU-US Data Privacy Framework.
+                <br />
+                Datenschutzerklärung: <a href="https://render.com/privacy" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">https://render.com/privacy</a>
               </p>
 
               <h2>3. Allgemeine Hinweise und Pflichtinformationen</h2>

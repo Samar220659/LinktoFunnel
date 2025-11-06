@@ -1,9 +1,9 @@
 # 📋 VERARBEITUNGSVERZEICHNIS (RoPA)
 ## Record of Processing Activities - DSGVO Art. 30
 
-**Stand:** {Aktuelles Datum eintragen}
-**Verantwortlicher:** {Ihr Name / Firma aus Impressum}
-**Kontakt:** {E-Mail aus Impressum}
+**Stand:** 06.11.2025
+**Verantwortlicher:** Daniel Oettel
+**Kontakt:** a22061981@gmx.de
 
 ---
 
@@ -43,7 +43,7 @@ Dieses Dokument ist **gesetzlich verpflichtend** gemäß **DSGVO Art. 30**.
 - Name (bei Kontaktaufnahme)
 
 ### 1.4 Kategorien von Empfängern
-- Hosting-Provider: {Name des Hosting-Providers eintragen - z.B. Railway, Vercel, Render}
+- Hosting-Provider: Render.com (USA)
 - CDN-Provider: {Falls vorhanden}
 - IT-Dienstleister: {Falls vorhanden}
 
@@ -335,7 +335,7 @@ Siehe: [TOM.md](./TOM.md)
 
 ### ✅ EU/Deutschland (DSGVO-konform):
 - DigiStore24 (Deutschland)
-- {Ihr Hosting, falls EU}
+- Render.com (USA)
 
 ### ⚠️ USA (EU-US Data Privacy Framework):
 - Google Gemini AI
@@ -355,8 +355,8 @@ Siehe: [TOM.md](./TOM.md)
 
 | Datum | Änderung | Durchgeführt von |
 |-------|----------|------------------|
-| {Datum} | Initiale Erstellung | {Ihr Name} |
-| {Datum} | {Änderung} | {Name} |
+| 06.11.2025 | Initiale Erstellung | Daniel Oettel |
+| 06.11.2025 | {Änderung} | Daniel Oettel |
 
 ---
 
@@ -409,5 +409,5 @@ Siehe: [TOM.md](./TOM.md)
 
 ---
 
-**Stand:** {DATUM EINTRAGEN}
-**Nächste Aktualisierung:** {DATUM + 1 Jahr}
+**Stand:** 06.11.2025
+**Nächste Aktualisierung:** 06.11.2026

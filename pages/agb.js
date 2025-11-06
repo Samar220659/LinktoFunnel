@@ -30,40 +30,11 @@ export default function AGB() {
 
           {/* Important Notice */}
           <div className="prose prose-lg max-w-none">
-            <p className="bg-yellow-50 border-l-4 border-yellow-400 p-4 my-4">
-              <strong>⚠️ WICHTIG:</strong> Ersetzen Sie diesen Platzhalter-Text mit Ihren echten AGB!
-              <br />
-              <br />
-              Kostenlose AGB-Generatoren:
-              <ul className="mt-2 space-y-1">
-                <li>
-                  <a href="https://www.agb.de/agb-erstellen" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
-                    agb.de/agb-erstellen
-                  </a>
-                </li>
-                <li>
-                  <a href="https://www.ihk.de/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
-                    IHK AGB-Muster
-                  </a> (für IHK-Mitglieder oft kostenlos)
-                </li>
-              </ul>
-              <br />
-              <strong>WICHTIG:</strong> AGB müssen zu Ihrem Geschäftsmodell passen!
-              <br />
-              Für Affiliate-Marketing, digitale Produkte, Software-as-a-Service, etc.
-            </p>
-
-            {/*
-              ============================================================
-              ERSETZEN SIE DIESEN BEREICH MIT IHREN ECHTEN AGB
-              ============================================================
-            */}
-
             <div className="bg-gray-100 p-6 rounded-lg my-6">
               <h2>§ 1 Geltungsbereich</h2>
               <p>
                 (1) Diese Allgemeinen Geschäftsbedingungen (nachfolgend "AGB") gelten für alle Verträge über die
-                Lieferung von Waren und/oder Dienstleistungen, die zwischen [Ihr Firmenname] (nachfolgend "Anbieter")
+                Lieferung von Waren und/oder Dienstleistungen, die zwischen Daniel Oettel (nachfolgend "Anbieter")
                 und dem Kunden (nachfolgend "Kunde") geschlossen werden.
               </p>
               <p>
@@ -95,16 +66,15 @@ export default function AGB() {
               </p>
               <ul>
                 <li>PayPal</li>
-                <li>Kreditkarte</li>
-                <li>[Weitere Zahlungsarten]</li>
+                <li>DigiStore24 (für Affiliate-Produkte)</li>
               </ul>
 
               <h2>§ 4 Lieferung und Versand</h2>
               <p>
-                (1) Die Lieferung erfolgt [digital/per E-Mail/per Download/etc.].
+                (1) Die Lieferung erfolgt digital über Online-Zugang oder per E-Mail.
               </p>
               <p>
-                (2) Die Lieferzeit beträgt [X] Werktage ab Zahlungseingang.
+                (2) Die Lieferzeit beträgt in der Regel unmittelbar nach Zahlungseingang bzw. erfolgt automatisiert.
               </p>
 
               <h2>§ 5 Widerrufsrecht</h2>

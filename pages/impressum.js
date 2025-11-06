@@ -32,55 +32,39 @@ export default function Impressum() {
           <div className="prose prose-lg max-w-none">
             <h2>Angaben gemäß § 5 TMG</h2>
 
-            <p className="bg-yellow-50 border-l-4 border-yellow-400 p-4 my-4">
-              <strong>⚠️ WICHTIG:</strong> Ersetzen Sie diesen Platzhalter-Text mit Ihrem echten Impressum!
-              <br />
-              <br />
-              Nutzen Sie den kostenlosen Generator:
-              <a href="https://www.impressum-generator.de/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline ml-1">
-                impressum-generator.de
-              </a>
-            </p>
-
-            {/*
-              ============================================================
-              ERSETZEN SIE DIESEN BEREICH MIT IHREM ECHTEN IMPRESSUM
-              ============================================================
-            */}
-
             <div className="bg-gray-100 p-6 rounded-lg my-6">
               <h3>Betreiber der Website</h3>
               <p>
-                [Ihr vollständiger Name / Firmenname]<br />
-                [Straße und Hausnummer]<br />
-                [PLZ und Ort]<br />
-                [Land]
+                Daniel Oettel<br />
+                Pekinger Str. 5<br />
+                06712 Zeitz<br />
+                Deutschland
               </p>
 
               <h3 className="mt-6">Kontakt</h3>
               <p>
-                Telefon: [Ihre Telefonnummer]<br />
-                E-Mail: [Ihre E-Mail-Adresse]
+                E-Mail: a22061981@gmx.de
               </p>
 
               <h3 className="mt-6">Umsatzsteuer-ID</h3>
               <p>
                 Umsatzsteuer-Identifikationsnummer gemäß § 27a UStG:<br />
-                [Ihre USt-ID oder "Nicht umsatzsteuerpflichtig" für Kleinunternehmer]
+                DE453548228
+              </p>
+
+              <h3 className="mt-6">Steuernummer</h3>
+              <p>
+                119/254/03506<br />
+                Finanzamt Naumburg
               </p>
 
               <h3 className="mt-6">Verantwortlich für den Inhalt nach § 55 Abs. 2 RStV</h3>
               <p>
-                [Ihr vollständiger Name]<br />
-                [Ihre Adresse]
+                Daniel Oettel<br />
+                Pekinger Str. 5<br />
+                06712 Zeitz
               </p>
             </div>
-
-            {/*
-              ============================================================
-              ENDE DES ZU ERSETZENDEN BEREICHS
-              ============================================================
-            */}
 
             <h2>EU-Streitschlichtung</h2>
             <p>

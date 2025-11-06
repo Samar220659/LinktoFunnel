@@ -1,8 +1,8 @@
 # 🔒 TECHNISCHE UND ORGANISATORISCHE MAẞNAHMEN (TOM)
 ## Technical and Organizational Measures - DSGVO Art. 32
 
-**Stand:** {Aktuelles Datum eintragen}
-**Verantwortlicher:** {Ihr Name / Firma}
+**Stand:** 06.11.2025
+**Verantwortlicher:** Daniel Oettel
 **System:** LinktoFunnel - AI-Powered Social Media Marketing System
 
 ---
@@ -232,7 +232,7 @@ class SecureStorage {
 - ⚠️ **Falls E-Mail-Versand:**
   - TLS-verschlüsselt
   - SPF/DKIM/DMARC konfiguriert
-  - {E-Mail-Provider eintragen}
+  - GMX (falls E-Mail-Versand genutzt)
 
 **Status:** ✅ Implementiert
 
@@ -432,7 +432,7 @@ class SecureStorage {
    - AVV vorhanden: {Ja/Nein - prüfen!}
    - Link: https://supabase.com/privacy
 
-2. ✅ **{Ihr Hosting-Provider}**
+2. ✅ **Render.com**
    - AVV vorhanden: {Ja/Nein - prüfen!}
    - Link: {URL zur DPA eintragen}
 
@@ -527,7 +527,7 @@ class SecureStorage {
    - Vorfall dokumentieren
 
 **Notfall-Kontakte:**
-- Aufsichtsbehörde: {Ihr Bundesland eintragen}
+- Aufsichtsbehörde: Sachsen-Anhalt
 - Rechtsanwalt: {Falls vorhanden}
 
 ---
@@ -597,6 +597,6 @@ class SecureStorage {
 
 ---
 
-**Stand:** {DATUM EINTRAGEN}
-**Nächste Überprüfung:** {DATUM + 1 Jahr}
+**Stand:** 06.11.2025
+**Nächste Überprüfung:** 06.11.2026
 **Verantwortlich:** {IHR NAME}
