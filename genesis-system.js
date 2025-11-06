@@ -225,7 +225,40 @@ class GenesisSystem {
     console.log(`\n✅ Generated ${generatedContent.length} pieces of content`);
     console.log(`   Saved to: ${path.basename(contentFile)}`);
 
+    // Optional: Auto-Post if enabled
+    await this.autoPostContent(generatedContent);
+
     return generatedContent;
+  }
+
+  /**
+   * 🚀 AUTO-POST CONTENT (Optional)
+   */
+  async autoPostContent(content) {
+    // Check if auto-posting is enabled
+    const autoPostEnabled = process.env.AUTO_POST_ENABLED === 'true';
+
+    if (!autoPostEnabled) {
+      return; // Skip auto-posting
+    }
+
+    try {
+      console.log('\n🚀 Auto-Posting aktiviert - starte Posting...');
+
+      // Call auto-post script
+      const { stdout, stderr } = await execAsync('bash auto-post.sh all');
+
+      if (stderr && !stderr.includes('Trying')) {
+        console.log('Auto-Post stderr:', stderr);
+      }
+
+      console.log('✅ Auto-Posting abgeschlossen');
+      this.metrics.postsPublished += content.length;
+
+    } catch (error) {
+      console.log('⚠️  Auto-Posting fehlgeschlagen:', error.message);
+      console.log('💡 Content kann manuell gepostet werden: bash auto-post.sh all');
+    }
   }
 
   /**
