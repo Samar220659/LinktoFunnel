@@ -349,32 +349,37 @@ class SocialMediaPoster {
    * Formatiert Caption für spezifische Plattform
    */
   formatCaption(content, platform) {
+    const landingPageUrl = process.env.LANDING_PAGE_URL || 'https://ai-automation-blueprint.onrender.com';
     let caption = '';
 
     switch (platform) {
       case 'tiktok':
-        caption = `${content.hook}\n\n${content.caption}\n\n${content.cta}\n\n`;
+        caption = `${content.hook}\n\n${content.caption}\n\n`;
+        caption += `🔗 Link in Bio: ${landingPageUrl}\n\n`;
+        caption += `${content.cta}\n\n`;
         caption += content.hashtags.map(h => '#' + h).join(' ');
         break;
 
       case 'instagram':
-        caption = `${content.hook}\n\n${content.caption}\n\n${content.cta}\n\n`;
+        caption = `${content.hook}\n\n${content.caption}\n\n`;
+        caption += `🔗 Link in Bio: ${landingPageUrl}\n\n`;
+        caption += `${content.cta}\n\n`;
         caption += content.hashtags.slice(0, 10).map(h => '#' + h).join(' ');
         break;
 
       case 'youtube':
         caption = `${content.caption}\n\n${content.cta}\n\n`;
         caption += '━'.repeat(50) + '\n\n';
-        caption += '🔗 Links:\n';
-        caption += '→ Affiliate Link: [Your Link]\n';
-        caption += '→ Instagram: [Your Handle]\n';
-        caption += '→ TikTok: [Your Handle]\n\n';
+        caption += '🔗 Wichtige Links:\n';
+        caption += `→ Landing Page: ${landingPageUrl}\n`;
+        caption += `→ Weitere Infos: ${landingPageUrl}\n\n`;
         caption += '━'.repeat(50) + '\n\n';
         caption += content.hashtags.map(h => '#' + h).join(' ');
         break;
 
       case 'pinterest':
-        caption = `${content.caption}\n\n${content.cta}`;
+        caption = `${content.caption}\n\n${content.cta}\n\n`;
+        caption += `🔗 Mehr erfahren: ${landingPageUrl}`;
         break;
 
       default:
