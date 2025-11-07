@@ -1,11 +1,12 @@
-/** @.cache/node-gyp/24.9.0/include/node/cppgc/type-traits.h {import('next').NextConfig} */
+/** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'export',
-  basePath: process.env.NODE_ENV === 'production' ? '/LinktoFunnel' : '',
-  assetPrefix: process.env.NODE_ENV === 'production' ? '/LinktoFunnel' : '',
+  // Removed 'output: export' to enable API routes
+  // API routes needed for: /api/health, /api/dashboard-data
   images: {
     unoptimized: true,
   },
+  // Only use basePath in production static export if needed
+  // For development and production with API routes, keep these disabled
 };
 
 module.exports = nextConfig;
