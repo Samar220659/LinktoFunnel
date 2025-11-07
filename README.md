@@ -5,10 +5,32 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Node.js](https://img.shields.io/badge/Node.js-20+-green.svg)](https://nodejs.org/)
 [![AI Powered](https://img.shields.io/badge/AI-Powered-blue.svg)](https://openai.com/)
+[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template/linktofunnel-autopilot)
 
 ---
 
-## 🚀 AUTO-PILOT MODUS (NEU!)
+## 📱 MOBILE-ONLY SETUP (EMPFOHLEN!)
+
+**🚀 NUR VOM HANDY - Kein Computer, kein Code, nur Telegram!**
+
+**1️⃣ Klick auf Deploy Button:**
+[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template/linktofunnel-autopilot)
+
+**2️⃣ Environment Variables einfügen** (5 Min)
+
+**3️⃣ Telegram Bot starten** (`/start`)
+
+**4️⃣ Fragen beantworten** (im Chat, 10 Min)
+
+**✅ Fertig!** System läuft automatisch!
+
+➡️ **Komplette Anleitung:** [📱 MOBILE_SETUP.md](./MOBILE_SETUP.md)
+
+**⏰ Dein Aufwand danach:** Nur noch 2 Min/Tag!
+
+---
+
+## 🚀 AUTO-PILOT MODUS
 
 **⚡ STARTE IN 30 MINUTEN - Danach nur noch 2 MIN/TAG!**
 
@@ -46,6 +68,7 @@ http://localhost:3000/approvals
 
 | Guide | Description | Link |
 |-------|-------------|------|
+| **📱 MOBILE-ONLY Setup** | ⭐ Komplettes Setup NUR vom Handy! | [MOBILE_SETUP.md](./MOBILE_SETUP.md) |
 | **🤖 AUTO-PILOT System** | Vollautomatisches System - nur 2 Min/Tag! | [MCP_AUTO_PILOT.md](./MCP_AUTO_PILOT.md) |
 | **⚡ Sofort-Start** | In 4 Stunden zum ersten Video online | [START_JETZT_SOFORT.md](./START_JETZT_SOFORT.md) |
 | **💰 Zero-Budget Business** | Kompletter 0€ Business-Plan | [ZERO_BUDGET_BUSINESS_PLAN.md](./ZERO_BUDGET_BUSINESS_PLAN.md) |

@@ -5,10 +5,13 @@
 	"engines": {
 		"node": ">=18.0.0"
 	},
+	"type": "module",
 	"scripts": {
 		"dev": "next dev",
 		"build": "next build",
 		"start": "next start",
+		"start:bot": "node telegram-bot-mobile-setup.js",
+		"start:production": "concurrently \"npm start\" \"npm run start:bot\" \"cd mcp-server && npm start\"",
 		"lint": "next lint",
 		"test": "node scripts/test-apis.js"
 	},
@@ -19,7 +22,10 @@
 		"google-auth-library": "^9.0.0",
 		"next": "^14.0.4",
 		"react": "^18.2.0",
-		"react-dom": "^18.2.0"
+		"react-dom": "^18.2.0",
+		"openai": "^4.20.0",
+		"node-cron": "^3.0.3",
+		"concurrently": "^8.2.2"
 	},
 	"devDependencies": {
 		"dotenv": "^16.3.1"

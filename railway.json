@@ -18,7 +18,7 @@
   },
   "services": [
     {
-      "name": "telegram-bot",
+      "name": "telegram-bot-mobile",
       "source": {
         "type": "git"
       },
@@ -26,7 +26,7 @@
         "buildCommand": "npm install"
       },
       "deploy": {
-        "startCommand": "node ai-agent/telegram-bot.js",
+        "startCommand": "node telegram-bot-mobile-setup.js",
         "runtime": "V2"
       },
       "env": {
@@ -34,35 +34,35 @@
       }
     },
     {
-      "name": "super-automation",
+      "name": "mcp-autopilot-server",
       "source": {
         "type": "git"
       },
       "build": {
-        "buildCommand": "npm install"
+        "buildCommand": "cd mcp-server && npm install"
       },
       "deploy": {
-        "startCommand": "node ai-agent/SUPER_AUTOMATION.js",
+        "startCommand": "cd mcp-server && npm start",
         "runtime": "V2"
       },
       "cron": {
-        "schedule": "0 9 * * *",
-        "command": "node ai-agent/SUPER_AUTOMATION.js"
+        "schedule": "0 7 * * *",
+        "command": "node mcp-server/cron-jobs.js"
       },
       "env": {
         "NODE_ENV": "production"
       }
     },
     {
-      "name": "api-server",
+      "name": "nextjs-dashboard",
       "source": {
         "type": "git"
       },
       "build": {
-        "buildCommand": "npm install"
+        "buildCommand": "npm install && npm run build"
       },
       "deploy": {
-        "startCommand": "node server.js",
+        "startCommand": "npm start",
         "runtime": "V2"
       },
       "healthcheckPath": "/health",
@@ -79,9 +79,14 @@
         "REQUIRED": [
           "NEXT_PUBLIC_SUPABASE_URL",
           "NEXT_PUBLIC_SUPABASE_ANON_KEY",
-          "GEMINI_API_KEY",
-          "TELEGRAM_BOT_TOKEN",
-          "TELEGRAM_CHAT_ID"
+          "SUPABASE_SERVICE_KEY",
+          "OPENAI_API_KEY",
+          "TELEGRAM_BOT_TOKEN"
+        ],
+        "OPTIONAL": [
+          "DEPLOYMENT_URL",
+          "NODE_ENV",
+          "PORT"
         ]
       }
     }
