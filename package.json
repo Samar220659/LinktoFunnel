@@ -22,7 +22,9 @@
 		"orchestrator": "node ai-agent/MASTER_ORCHESTRATOR.js",
 		"api:start": "node api-server.js",
 		"api:dev": "NODE_ENV=development node api-server.js",
-		"deploy:render": "./scripts/deploy-to-render.sh"
+		"deploy:render": "./scripts/deploy-to-render.sh",
+		"money:setup": "node scripts/quick-money-setup.js",
+		"money:fast": "node scripts/quick-money-setup.js"
 	},
 	"dependencies": {
 		"@google-ai/generativelanguage": "^3.4.1",
