@@ -10,7 +10,16 @@
 		"build": "next build",
 		"start": "next start",
 		"lint": "next lint",
-		"test": "node scripts/test-apis.js"
+		"test": "node scripts/test-apis.js",
+		"keys:setup": "node scripts/setup-api-keys.js",
+		"keys:add": "node scripts/manage-keys.js add",
+		"keys:list": "node scripts/manage-keys.js list",
+		"keys:export": "node scripts/manage-keys.js export",
+		"keys:import": "node scripts/manage-keys.js import",
+		"keys:health": "node scripts/manage-keys.js health",
+		"keys": "node scripts/manage-keys.js",
+		"db:setup": "echo 'Copy ai-agent/data/schema.sql + api-secrets-schema.sql to Supabase SQL Editor'",
+		"orchestrator": "node ai-agent/MASTER_ORCHESTRATOR.js"
 	},
 	"dependencies": {
 		"@google-ai/generativelanguage": "^3.4.1",
@@ -19,7 +28,8 @@
 		"google-auth-library": "^9.0.0",
 		"next": "^14.0.4",
 		"react": "^18.2.0",
-		"react-dom": "^18.2.0"
+		"react-dom": "^18.2.0",
+		"chalk": "^5.3.0"
 	},
 	"devDependencies": {
 		"dotenv": "^16.3.1"
