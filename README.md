@@ -8,12 +8,48 @@
 
 ---
 
+## 🚀 AUTO-PILOT MODUS (NEU!)
+
+**⚡ STARTE IN 30 MINUTEN - Danach nur noch 2 MIN/TAG!**
+
+```bash
+# Setup-Wizard starten (führt durch alles):
+node setup-wizard.js
+
+# System starten:
+npm run start
+
+# Dashboard öffnen:
+http://localhost:3000/approvals
+```
+
+**Was du machst:**
+- ✅ Morgens 2 Min: 2 Varianten ansehen → Beste wählen
+- ✅ System macht alles andere automatisch!
+
+**Was das System automatisch macht:**
+- 🤖 Produkte finden (05:00)
+- 📝 Content generieren (07:00)
+- ⏰ Dir 2 Varianten vorlegen (08:00)
+- 🎬 Nach Approval: Video produzieren
+- 📤 Zur besten Zeit posten (18:00)
+- 📊 Analytics tracken & optimieren (23:00)
+- 💰 Geld verdienen (24/7)
+
+➡️ **Mehr Infos:** [MCP_AUTO_PILOT.md](./MCP_AUTO_PILOT.md)
+
+---
+
 ## 📚 COMPLETE DOCUMENTATION
 
 **🚀 NEW: Comprehensive guides for full-stack development and business automation**
 
 | Guide | Description | Link |
 |-------|-------------|------|
+| **🤖 AUTO-PILOT System** | Vollautomatisches System - nur 2 Min/Tag! | [MCP_AUTO_PILOT.md](./MCP_AUTO_PILOT.md) |
+| **⚡ Sofort-Start** | In 4 Stunden zum ersten Video online | [START_JETZT_SOFORT.md](./START_JETZT_SOFORT.md) |
+| **💰 Zero-Budget Business** | Kompletter 0€ Business-Plan | [ZERO_BUDGET_BUSINESS_PLAN.md](./ZERO_BUDGET_BUSINESS_PLAN.md) |
+| **🎯 Automation Prompts** | Copy-Paste Prompts für alle Aufgaben | [AUTOMATION_PROMPTS.md](./AUTOMATION_PROMPTS.md) |
 | **Full-Stack Development Guide** | Complete guide to building AI-powered automation systems | [FULLSTACK_AUTOMATION_GUIDE.md](./FULLSTACK_AUTOMATION_GUIDE.md) |
 | **Integration Guide** | API integrations, OAuth, and deployment | [INTEGRATION_GUIDE.md](./INTEGRATION_GUIDE.md) |
 | **Quick Start** | Get started in 10 minutes | [GETTING_STARTED.md](./GETTING_STARTED.md) |
