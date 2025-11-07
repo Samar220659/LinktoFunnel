@@ -1,0 +1,152 @@
+# 🚀 RENDER.COM DEPLOYMENT CONFIGURATION
+# Blueprint for LinktoFunnel AI Business Agent Platform
+
+services:
+  # Main API Server
+  - type: web
+    name: linktofunnel-api
+    runtime: node
+    plan: free
+    region: frankfurt  # EU region for GDPR compliance
+    buildCommand: npm install
+    startCommand: node api-server.js
+    healthCheckPath: /health
+    autoDeploy: true
+
+    envVars:
+      - key: NODE_ENV
+        value: production
+
+      - key: PORT
+        value: 3000
+
+      # Supabase (from environment)
+      - key: NEXT_PUBLIC_SUPABASE_URL
+        sync: false
+
+      - key: NEXT_PUBLIC_SUPABASE_ANON_KEY
+        sync: false
+
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+
+      # AI Services
+      - key: GEMINI_API_KEY
+        sync: false
+
+      - key: OPENAI_API_KEY
+        sync: false
+
+      # Notifications
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
+
+      - key: TELEGRAM_CHAT_ID
+        sync: false
+
+      # Marketing APIs
+      - key: DIGISTORE24_API_KEY
+        sync: false
+
+      - key: GETRESPONSE_API_KEY
+        sync: false
+
+      - key: SCRAPINGBEE_API_KEY
+        sync: false
+
+      # Social Media
+      - key: TIKTOK_ACCESS_TOKEN
+        sync: false
+
+      - key: INSTAGRAM_ACCESS_TOKEN
+        sync: false
+
+      - key: YOUTUBE_API_KEY
+        sync: false
+
+      - key: PINTEREST_ACCESS_TOKEN
+        sync: false
+
+      # Encryption
+      - key: MASTER_ENCRYPTION_KEY
+        generateValue: true  # Auto-generate secure key
+
+      # Render detection
+      - key: RENDER
+        value: "true"
+
+      - key: RENDER_REGION
+        value: "frankfurt"
+
+  # Telegram Bot Service (Background Worker)
+  - type: worker
+    name: linktofunnel-telegram-bot
+    runtime: node
+    plan: free
+    region: frankfurt
+    buildCommand: npm install
+    startCommand: node ai-agent/telegram-bot.js
+    autoDeploy: true
+
+    envVars:
+      - key: NODE_ENV
+        value: production
+
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
+
+      - key: TELEGRAM_CHAT_ID
+        sync: false
+
+      - key: NEXT_PUBLIC_SUPABASE_URL
+        sync: false
+
+      - key: NEXT_PUBLIC_SUPABASE_ANON_KEY
+        sync: false
+
+      - key: GEMINI_API_KEY
+        sync: false
+
+  # Master Orchestrator (Cron Job)
+  - type: cron
+    name: linktofunnel-orchestrator
+    runtime: node
+    plan: free
+    region: frankfurt
+    buildCommand: npm install
+    schedule: "0 9 * * *"  # Daily at 9:00 AM
+    startCommand: node ai-agent/MASTER_ORCHESTRATOR.js
+    autoDeploy: true
+
+    envVars:
+      - key: NODE_ENV
+        value: production
+
+      - key: NEXT_PUBLIC_SUPABASE_URL
+        sync: false
+
+      - key: NEXT_PUBLIC_SUPABASE_ANON_KEY
+        sync: false
+
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+
+      - key: GEMINI_API_KEY
+        sync: false
+
+      - key: OPENAI_API_KEY
+        sync: false
+
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
+
+      - key: TELEGRAM_CHAT_ID
+        sync: false
+
+# Database (if you want PostgreSQL on Render)
+databases:
+  - name: linktofunnel-db
+    plan: free
+    databaseName: linktofunnel
+    user: linktofunnel
+    region: frankfurt
