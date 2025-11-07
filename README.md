@@ -1,10 +1,24 @@
-# 🤖 AI BUSINESS AGENT - Digitaler Zwilling
+# 🤖 LinktoFunnel - AI-Powered Social Media Automation
 
 **Vollautomatisches passives Einkommen durch AI-gesteuerte Marketing-Automation**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Node.js](https://img.shields.io/badge/Node.js-18+-green.svg)](https://nodejs.org/)
-[![AI Powered](https://img.shields.io/badge/AI-Powered-blue.svg)](https://ai.google.dev/)
+[![Node.js](https://img.shields.io/badge/Node.js-20+-green.svg)](https://nodejs.org/)
+[![AI Powered](https://img.shields.io/badge/AI-Powered-blue.svg)](https://openai.com/)
+
+---
+
+## 📚 COMPLETE DOCUMENTATION
+
+**🚀 NEW: Comprehensive guides for full-stack development and business automation**
+
+| Guide | Description | Link |
+|-------|-------------|------|
+| **Full-Stack Development Guide** | Complete guide to building AI-powered automation systems | [FULLSTACK_AUTOMATION_GUIDE.md](./FULLSTACK_AUTOMATION_GUIDE.md) |
+| **Integration Guide** | API integrations, OAuth, and deployment | [INTEGRATION_GUIDE.md](./INTEGRATION_GUIDE.md) |
+| **Quick Start** | Get started in 10 minutes | [GETTING_STARTED.md](./GETTING_STARTED.md) |
+| **Architecture** | System design and agent architecture | [ai-agent/ARCHITECTURE.md](./ai-agent/ARCHITECTURE.md) |
+| **Deployment** | Railway, Vercel, VPS deployment | [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md) |
 
 ---
 
@@ -13,13 +27,26 @@
 Ein **autonomer digitaler Zwilling** der dein Online-Business **komplett automatisch** führt:
 
 - 🔍 **Findet hochkonvertierende Produkte** auf Digistore24
-- 🎬 **Generiert Marketing-Videos** mit KI (LinktoFunnel)
+- 🎬 **Generiert virale Video-Scripts** mit GPT-4
+- 🖼️ **Erstellt Keyframe-Bilder** mit DALL-E 3
+- 📱 **Postet auf 9+ Social Media Plattformen** (TikTok, Instagram, YouTube, Pinterest, Twitter, etc.)
 - 🌪️ **Erstellt Sales-Funnels** automatisch (zZ-Lobby Integration)
 - 📧 **E-Mail-Marketing** mit GetResponse
 - 📊 **Optimiert Kampagnen** mit Reinforcement Learning
 - 💰 **Generiert passives Einkommen** 24/7
 
-**Alles steuerbar vom Handy via Termux!**
+**Alles steuerbar vom Handy via Termux oder Browser-Dashboard!**
+
+### ✨ Neu in Version 2.0
+
+- ✅ **Real Social Media API Integrations** (TikTok, Instagram, YouTube, Pinterest, Twitter)
+- ✅ **OAuth 2.0 Authentication Flow** for all platforms
+- ✅ **Enhanced AI Agents** with perceive-decide-act-learn architecture
+- ✅ **Unified API Endpoint System** with REST API
+- ✅ **Real-time Analytics** and performance tracking
+- ✅ **Automatic token refresh** for long-term automation
+- ✅ **Multi-platform posting** with optimal timing
+- ✅ **Comprehensive error handling** and retry logic
 
 ---
 
