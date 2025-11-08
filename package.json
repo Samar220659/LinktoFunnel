@@ -1,7 +1,8 @@
 {
 	"name": "linktofunnel",
-	"version": "1.0.0",
+	"version": "2.0.0",
 	"private": true,
+	"description": "AI-powered affiliate marketing automation with video generation and multi-platform posting",
 	"engines": {
 		"node": ">=18.0.0"
 	},
@@ -10,18 +11,32 @@
 		"build": "next build",
 		"start": "next start",
 		"lint": "next lint",
-		"test": "node scripts/test-apis.js"
+		"test": "node scripts/test-apis.js",
+		"generate-video": "node lib/video-generator.js",
+		"post-social": "node lib/social-media/unified-poster.js",
+		"ai-trinity": "node ai-trinity/index.js",
+		"automation": "node ai-agent/SUPER_AUTOMATION.js",
+		"telegram-bot": "node ai-agent/telegram-bot.js"
 	},
 	"dependencies": {
+		"@anthropic-ai/sdk": "^0.20.0",
 		"@google-ai/generativelanguage": "^3.4.1",
+		"@google/generative-ai": "^0.2.1",
 		"@supabase/supabase-js": "^2.39.0",
-		"node-telegram-bot-api": "^0.64.0",
+		"chokidar": "^3.5.3",
+		"form-data": "^4.0.0",
 		"google-auth-library": "^9.0.0",
+		"googleapis": "^128.0.0",
 		"next": "^14.0.4",
+		"node-telegram-bot-api": "^0.64.0",
 		"react": "^18.2.0",
-		"react-dom": "^18.2.0"
+		"react-dom": "^18.2.0",
+		"winston": "^3.11.0"
 	},
 	"devDependencies": {
 		"dotenv": "^16.3.1"
+	},
+	"optionalDependencies": {
+		"ffmpeg-static": "^5.2.0"
 	}
 }
