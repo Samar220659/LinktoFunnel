@@ -71,6 +71,48 @@
         "NODE_ENV": "production",
         "PORT": "3000"
       }
+    },
+    {
+      "name": "n8n-workflow-engine",
+      "source": {
+        "type": "image",
+        "image": "n8nio/n8n:latest"
+      },
+      "deploy": {
+        "runtime": "V2"
+      },
+      "healthcheckPath": "/healthz",
+      "healthcheckTimeout": 100,
+      "env": {
+        "N8N_HOST": "0.0.0.0",
+        "N8N_PORT": "5678",
+        "N8N_PROTOCOL": "http",
+        "NODE_ENV": "production",
+        "WEBHOOK_URL": "https://${RAILWAY_PUBLIC_DOMAIN}",
+        "GENERIC_TIMEZONE": "Europe/Berlin",
+        "N8N_ENCRYPTION_KEY": "${N8N_ENCRYPTION_KEY}",
+        "EXECUTIONS_DATA_SAVE_ON_ERROR": "all",
+        "EXECUTIONS_DATA_SAVE_ON_SUCCESS": "all",
+        "EXECUTIONS_DATA_SAVE_MANUAL_EXECUTIONS": "true"
+      }
+    },
+    {
+      "name": "ai-trinity-orchestrator",
+      "source": {
+        "type": "git"
+      },
+      "build": {
+        "buildCommand": "npm install"
+      },
+      "deploy": {
+        "startCommand": "node ai-trinity/index.js",
+        "runtime": "V2"
+      },
+      "env": {
+        "NODE_ENV": "production",
+        "ANTHROPIC_API_KEY": "${ANTHROPIC_API_KEY}",
+        "GEMINI_API_KEY": "${GEMINI_API_KEY}"
+      }
     }
   ],
   "environments": {

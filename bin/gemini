@@ -1,0 +1,73 @@
+#!/data/data/com.termux/files/usr/bin/python3
+"""
+🚀 GEMINI CLI für Termux (Python-based)
+Einfacher, direkter API-Zugriff ohne node-pty Probleme
+"""
+
+import sys
+import os
+import json
+import argparse
+from google import generativeai as genai
+
+def main():
+    # API Key aus Environment
+    api_key = os.environ.get('GEMINI_API_KEY')
+    if not api_key:
+        print("❌ Error: GEMINI_API_KEY not set!")
+        print("   Run: export GEMINI_API_KEY='your_key_here'")
+        sys.exit(1)
+
+    # Configure Gemini
+    genai.configure(api_key=api_key)
+
+    # Model
+    model = genai.GenerativeModel('gemini-1.5-pro')
+
+    # Parse arguments
+    parser = argparse.ArgumentParser(description='Gemini CLI for Termux')
+    parser.add_argument('prompt', nargs='*', help='Prompt for Gemini')
+    parser.add_argument('--json', action='store_true', help='Output as JSON')
+    parser.add_argument('--temperature', type=float, default=0.9, help='Temperature (0-1)')
+    parser.add_argument('--max-tokens', type=int, default=8192, help='Max output tokens')
+    args = parser.parse_args()
+
+    # Get prompt from args or stdin
+    if args.prompt:
+        prompt = ' '.join(args.prompt)
+    else:
+        prompt = sys.stdin.read().strip()
+
+    if not prompt:
+        print("❌ Error: No prompt provided!")
+        print("Usage: gemini 'Your prompt here'")
+        print("   or: echo 'Your prompt' | gemini")
+        sys.exit(1)
+
+    try:
+        # Generate content
+        response = model.generate_content(
+            prompt,
+            generation_config=genai.types.GenerationConfig(
+                temperature=args.temperature,
+                max_output_tokens=args.max_tokens
+            )
+        )
+
+        # Output
+        if args.json:
+            output = {
+                'prompt': prompt,
+                'response': response.text,
+                'model': 'gemini-1.5-pro'
+            }
+            print(json.dumps(output, indent=2))
+        else:
+            print(response.text)
+
+    except Exception as e:
+        print(f"❌ Error: {e}", file=sys.stderr)
+        sys.exit(1)
+
+if __name__ == '__main__':
+    main()
