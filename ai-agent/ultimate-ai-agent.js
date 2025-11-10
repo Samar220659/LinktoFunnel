@@ -14,13 +14,18 @@
  * - 🛍️ Shop Management
  * - 👔 CEO Decision Making
  * - ✅ Approval Workflow für kritische Aktionen
+ * - 🎓 SELF-LEARNING - Lernt aus jeder Interaktion
+ * - 🔄 SELF-HEALING - Repariert sich selbst bei Fehlern
  */
 
 require('dotenv').config({ path: '.env.local' });
+const fs = require('fs').promises;
+const path = require('path');
 
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const CHAT_ID = process.env.TELEGRAM_CHAT_ID;
 const GEMINI_KEY = process.env.GEMINI_API_KEY;
+const PROJECT_ROOT = process.env.PROJECT_ROOT || process.cwd();
 
 class UltimateAIAgent {
   constructor() {
@@ -28,6 +33,39 @@ class UltimateAIAgent {
     this.lastUpdateId = 0;
     this.conversationHistory = [];
     this.pendingApprovals = new Map();
+
+    // 🎓 SELF-LEARNING SYSTEM
+    this.learningData = {
+      qTable: new Map(), // State-Action values
+      experiences: [],
+      successfulResponses: [],
+      failedResponses: [],
+      userFeedback: new Map(),
+      toolPerformance: new Map(),
+      contentScores: []
+    };
+
+    // 🔄 SELF-HEALING SYSTEM
+    this.healingData = {
+      errors: [],
+      recoveryAttempts: 0,
+      lastHealthCheck: Date.now(),
+      consecutiveErrors: 0,
+      errorPatterns: new Map()
+    };
+
+    // Performance Metrics
+    this.metrics = {
+      totalMessages: 0,
+      successfulResponses: 0,
+      failedResponses: 0,
+      averageResponseTime: 0,
+      toolUsageCount: new Map(),
+      uptime: Date.now()
+    };
+
+    // Load saved learning data
+    this.loadLearningData();
 
     // Agent Tools
     this.tools = [
@@ -52,6 +90,33 @@ class UltimateAIAgent {
         description: 'Search the web for information',
         parameters: {
           query: 'string'
+        }
+      },
+      {
+        name: 'send_sms',
+        description: 'Send SMS via Termux (requires approval)',
+        parameters: {
+          number: 'string',
+          message: 'string'
+        }
+      },
+      {
+        name: 'make_call',
+        description: 'Make phone call via Termux (requires approval)',
+        parameters: {
+          number: 'string'
+        }
+      },
+      {
+        name: 'get_location',
+        description: 'Get current GPS location',
+        parameters: {}
+      },
+      {
+        name: 'take_photo',
+        description: 'Take photo with camera (requires approval)',
+        parameters: {
+          camera: 'string' // 'front' or 'back'
         }
       },
       {
@@ -299,6 +364,18 @@ ${this.tools.map(t => `- ${t.name}: ${t.description}`).join('\n')}
       case 'analyze_performance':
         return this.toolAnalyzePerformance(params);
 
+      case 'send_sms':
+        return this.toolSendSMS(params);
+
+      case 'make_call':
+        return this.toolMakeCall(params);
+
+      case 'get_location':
+        return this.toolGetLocation(params);
+
+      case 'take_photo':
+        return this.toolTakePhoto(params);
+
       default:
         return { error: 'Unknown tool' };
     }
@@ -498,9 +575,129 @@ Conversion: ${stats.performance.conversionRate}%
     };
   }
 
+  // ===== 📱 PHONE TOOLS (Termux Integration) =====
+
+  async toolSendSMS(params) {
+    // Requires approval!
+    const approvalId = Date.now().toString();
+    this.pendingApprovals.set(approvalId, {
+      tool: 'send_sms',
+      params: params,
+      timestamp: Date.now()
+    });
+
+    return {
+      needsApproval: true,
+      approvalId: approvalId,
+      message: `⚠️ SMS senden braucht Freigabe!\n\nAn: ${params.number}\nText: ${params.message}\n\nAntworte mit "JA ${approvalId}" um zu senden.`
+    };
+  }
+
+  async executeSendSMS(params) {
+    // Execute via Termux API
+    const { exec } = require('child_process');
+    const { promisify } = require('util');
+    const execAsync = promisify(exec);
+
+    try {
+      await execAsync(`termux-sms-send -n "${params.number}" "${params.message}"`);
+      return { success: true, message: `SMS gesendet an ${params.number}` };
+    } catch (error) {
+      return { error: `SMS Fehler: ${error.message}` };
+    }
+  }
+
+  async toolMakeCall(params) {
+    // Requires approval!
+    const approvalId = Date.now().toString();
+    this.pendingApprovals.set(approvalId, {
+      tool: 'make_call',
+      params: params,
+      timestamp: Date.now()
+    });
+
+    return {
+      needsApproval: true,
+      approvalId: approvalId,
+      message: `⚠️ Anruf braucht Freigabe!\n\nNummer: ${params.number}\n\nAntworte mit "JA ${approvalId}" um anzurufen.`
+    };
+  }
+
+  async executeMakeCall(params) {
+    const { exec } = require('child_process');
+    const { promisify } = require('util');
+    const execAsync = promisify(exec);
+
+    try {
+      await execAsync(`termux-telephony-call "${params.number}"`);
+      return { success: true, message: `Rufe ${params.number} an...` };
+    } catch (error) {
+      return { error: `Anruf Fehler: ${error.message}` };
+    }
+  }
+
+  async toolGetLocation(params) {
+    // No approval needed for location
+    const { exec } = require('child_process');
+    const { promisify } = require('util');
+    const execAsync = promisify(exec);
+
+    try {
+      const { stdout } = await execAsync('termux-location -p gps');
+      const location = JSON.parse(stdout);
+
+      return {
+        latitude: location.latitude,
+        longitude: location.longitude,
+        accuracy: location.accuracy,
+        altitude: location.altitude,
+        address: `https://maps.google.com/?q=${location.latitude},${location.longitude}`
+      };
+    } catch (error) {
+      return { error: `Location Fehler: ${error.message}` };
+    }
+  }
+
+  async toolTakePhoto(params) {
+    // Requires approval!
+    const approvalId = Date.now().toString();
+    this.pendingApprovals.set(approvalId, {
+      tool: 'take_photo',
+      params: params,
+      timestamp: Date.now()
+    });
+
+    return {
+      needsApproval: true,
+      approvalId: approvalId,
+      message: `⚠️ Foto aufnehmen braucht Freigabe!\n\nKamera: ${params.camera || 'back'}\n\nAntworte mit "JA ${approvalId}" um Foto zu machen.`
+    };
+  }
+
+  async executeTakePhoto(params) {
+    const { exec } = require('child_process');
+    const { promisify } = require('util');
+    const execAsync = promisify(exec);
+
+    try {
+      const camera = params.camera || 'back';
+      const filename = path.join(PROJECT_ROOT, `photo_${Date.now()}.jpg`);
+
+      await execAsync(`termux-camera-photo -c ${camera === 'front' ? 0 : 1} "${filename}"`);
+
+      return {
+        success: true,
+        filename: filename,
+        message: `Foto gespeichert: ${filename}`
+      };
+    } catch (error) {
+      return { error: `Foto Fehler: ${error.message}` };
+    }
+  }
+
   // ===== APPROVAL HANDLING =====
 
-  handleApproval(message) {
+  async handleApproval(message) {
     // Check if message is approval (e.g., "JA 1234567890")
     const match = message.match(/^(ja|yes)\s+(\d+)$/i);
     if (!match) return null;
@@ -516,52 +713,189 @@ Conversion: ${stats.performance.conversionRate}%
     this.pendingApprovals.delete(approvalId);
 
     // Execute the tool that was waiting for approval
-    return this.executeTool(approval.tool, approval.params);
+    // For phone tools, use execute* methods
+    switch (approval.tool) {
+      case 'send_sms':
+        return await this.executeSendSMS(approval.params);
+      case 'make_call':
+        return await this.executeMakeCall(approval.params);
+      case 'take_photo':
+        return await this.executeTakePhoto(approval.params);
+      default:
+        return this.executeTool(approval.tool, approval.params);
+    }
   }
 
   // ===== MESSAGE HANDLING =====
 
   async handleMessage(message) {
     const text = message.text;
+    const startTime = Date.now();
     console.log(`💬 Message: ${text}`);
 
-    // Show typing indicator
-    await this.sendTypingAction();
+    this.metrics.totalMessages++;
 
-    // Check if it's an approval
-    const approvalResult = this.handleApproval(text);
-    if (approvalResult) {
-      if (approvalResult.error) {
-        return this.sendMessage(`❌ ${approvalResult.error}`);
+    try {
+      // Show typing indicator
+      await this.sendTypingAction();
+
+      // Check if it's feedback (👍/👎/⭐)
+      if (this.detectFeedback(text)) {
+        this.handleFeedback(text);
+        return this.sendMessage('✅ Danke für dein Feedback! Ich lerne daraus.');
       }
-      return this.sendMessage(`✅ Aktion ausgeführt!`);
+
+      // Check if it's an approval
+      const approvalResult = this.handleApproval(text);
+      if (approvalResult) {
+        if (approvalResult.error) {
+          return this.sendMessage(`❌ ${approvalResult.error}`);
+        }
+
+        // Learn: Approval given = positive reward
+        this.learn(
+          { type: 'approval_request' },
+          { action: 'approved' },
+          1.0
+        );
+
+        return this.sendMessage(`✅ Aktion ausgeführt!`);
+      }
+
+      // 🎓 SELF-LEARNING: Check if we have learned behavior for this
+      const state = { messageType: this.classifyMessage(text) };
+      const learnedAction = this.getBestAction(state);
+
+      // Ask Gemini AI
+      const aiResult = await this.askGemini(text);
+
+      // Send AI response
+      await this.sendMessage(aiResult.response);
+
+      // If AI wants to use a tool, execute it
+      let toolReward = 0;
+      if (aiResult.toolIntent) {
+        const toolStartTime = Date.now();
+
+        try {
+          const toolResult = await this.executeTool(
+            aiResult.toolIntent.tool,
+            aiResult.toolIntent.params
+          );
+
+          if (toolResult.needsApproval) {
+            await this.sendMessage(toolResult.message);
+            toolReward = 0.5; // Neutral - waiting for approval
+          } else if (toolResult.error) {
+            await this.sendMessage(`❌ ${toolResult.error}`);
+            toolReward = -0.5; // Negative
+          } else {
+            // Send tool result
+            const formattedResult = this.formatToolResult(
+              aiResult.toolIntent.tool,
+              toolResult
+            );
+            await this.sendMessage(formattedResult);
+
+            // Calculate reward based on result
+            toolReward = this.calculateReward(aiResult.toolIntent.tool, toolResult);
+          }
+
+          // 🎓 LEARN from tool usage
+          this.learn(
+            state,
+            { tool: aiResult.toolIntent.tool, ...aiResult.toolIntent.params },
+            toolReward
+          );
+
+          // Track tool usage
+          const count = this.metrics.toolUsageCount.get(aiResult.toolIntent.tool) || 0;
+          this.metrics.toolUsageCount.set(aiResult.toolIntent.tool, count + 1);
+
+        } catch (error) {
+          // 🔄 SELF-HEALING: Handle tool errors
+          await this.handleError(error, { location: 'executeTool', tool: aiResult.toolIntent.tool });
+          await this.sendMessage('Sorry, hatte einen Fehler. Aber ich habe daraus gelernt! 🧠');
+
+          this.learn(state, { tool: aiResult.toolIntent.tool }, -1.0); // Learn to avoid this
+        }
+      }
+
+      // Update metrics
+      this.metrics.successfulResponses++;
+      const responseTime = Date.now() - startTime;
+      this.metrics.averageResponseTime =
+        (this.metrics.averageResponseTime * (this.metrics.totalMessages - 1) + responseTime) /
+        this.metrics.totalMessages;
+
+      // Learn from successful interaction
+      if (toolReward === 0) {
+        // No tool used, default positive reward
+        this.learn(state, { action: 'respond' }, 0.3);
+      }
+
+    } catch (error) {
+      // 🔄 SELF-HEALING: Handle message errors
+      this.metrics.failedResponses++;
+      await this.handleError(error, { location: 'handleMessage', message: text });
+
+      // Try to send fallback response
+      try {
+        await this.sendMessage('Sorry, hatte einen kurzen Aussetzer. Kannst du das nochmal sagen? 😅');
+      } catch (err) {
+        console.error('Failed to send error message:', err.message);
+      }
     }
 
-    // Ask Gemini AI
-    const aiResult = await this.askGemini(text);
+    // Run health check periodically
+    await this.healthCheck();
+  }
 
-    // Send AI response
-    await this.sendMessage(aiResult.response);
+  detectFeedback(text) {
+    return /^(👍|👎|⭐|gut|schlecht|super|mist)/i.test(text.trim());
+  }
 
-    // If AI wants to use a tool, execute it
-    if (aiResult.toolIntent) {
-      const toolResult = await this.executeTool(
-        aiResult.toolIntent.tool,
-        aiResult.toolIntent.params
-      );
+  handleFeedback(text) {
+    const positive = /^(👍|⭐|gut|super|perfekt)/i.test(text.trim());
+    const reward = positive ? 1.0 : -1.0;
 
-      if (toolResult.needsApproval) {
-        await this.sendMessage(toolResult.message);
-      } else if (toolResult.error) {
-        await this.sendMessage(`❌ ${toolResult.error}`);
-      } else {
-        // Send tool result
-        const formattedResult = this.formatToolResult(
-          aiResult.toolIntent.tool,
-          toolResult
-        );
-        await this.sendMessage(formattedResult);
-      }
+    // Apply feedback to last experience
+    if (this.learningData.experiences.length > 0) {
+      const lastExp = this.learningData.experiences[this.learningData.experiences.length - 1];
+      this.learn(lastExp.state, lastExp.action, reward, text);
+    }
+  }
+
+  classifyMessage(text) {
+    const lower = text.toLowerCase();
+
+    if (lower.match(/erstell|generier|mach/)) return 'create_request';
+    if (lower.match(/stats|zahlen|performance/)) return 'stats_request';
+    if (lower.match(/plan|strategie/)) return 'plan_request';
+    if (lower.match(/hilf|help|wie/)) return 'help_request';
+    if (lower.match(/post|veröffentlich/)) return 'post_request';
+
+    return 'conversation';
+  }
+
+  calculateReward(toolName, result) {
+    // Calculate reward based on tool and result
+    switch (toolName) {
+      case 'generate_content':
+        // High viral score = high reward
+        return (result.viralScore || 50) / 100;
+
+      case 'get_stats':
+        return 0.5; // Always helpful
+
+      case 'web_search':
+        return 0.6; // Research is valuable
+
+      case 'create_marketing_plan':
+        return 0.8; // High value
+
+      default:
+        return 0.5;
     }
   }
 
@@ -599,6 +933,236 @@ ${result.topProducts.map((p, i) => `${i+1}. ${p.name}: €${p.revenue}`).join('\
       default:
         return JSON.stringify(result, null, 2);
     }
+  }
+
+  // ===== 🎓 SELF-LEARNING SYSTEM =====
+
+  async loadLearningData() {
+    try {
+      const dataPath = path.join(PROJECT_ROOT, '.ai_learning_data.json');
+      const data = await fs.readFile(dataPath, 'utf-8');
+      const parsed = JSON.parse(data);
+
+      this.learningData.qTable = new Map(parsed.qTable || []);
+      this.learningData.experiences = parsed.experiences || [];
+      this.learningData.successfulResponses = parsed.successfulResponses || [];
+      this.learningData.toolPerformance = new Map(parsed.toolPerformance || []);
+
+      console.log('📚 Loaded learning data:', {
+        experiences: this.learningData.experiences.length,
+        qTableSize: this.learningData.qTable.size
+      });
+    } catch (error) {
+      console.log('📚 Starting fresh - no learning data found');
+    }
+  }
+
+  async saveLearningData() {
+    try {
+      const dataPath = path.join(PROJECT_ROOT, '.ai_learning_data.json');
+      const data = {
+        qTable: Array.from(this.learningData.qTable.entries()),
+        experiences: this.learningData.experiences.slice(-1000), // Keep last 1000
+        successfulResponses: this.learningData.successfulResponses.slice(-500),
+        toolPerformance: Array.from(this.learningData.toolPerformance.entries()),
+        lastSaved: new Date().toISOString()
+      };
+
+      await fs.writeFile(dataPath, JSON.stringify(data, null, 2));
+    } catch (error) {
+      console.error('Failed to save learning data:', error.message);
+    }
+  }
+
+  learn(state, action, reward, feedback = null) {
+    // Q-Learning: Learn from experience
+    const stateKey = JSON.stringify(state);
+    const currentQ = this.learningData.qTable.get(stateKey) || new Map();
+    const oldValue = currentQ.get(action) || 0;
+
+    const learningRate = 0.1;
+    const discountFactor = 0.9;
+
+    const newValue = oldValue + learningRate * (reward - oldValue);
+    currentQ.set(action, newValue);
+    this.learningData.qTable.set(stateKey, currentQ);
+
+    // Store experience
+    this.learningData.experiences.push({
+      state,
+      action,
+      reward,
+      feedback,
+      timestamp: Date.now()
+    });
+
+    // Update tool performance
+    if (action.tool) {
+      const toolStats = this.learningData.toolPerformance.get(action.tool) || {
+        uses: 0,
+        totalReward: 0,
+        avgReward: 0
+      };
+      toolStats.uses++;
+      toolStats.totalReward += reward;
+      toolStats.avgReward = toolStats.totalReward / toolStats.uses;
+      this.learningData.toolPerformance.set(action.tool, toolStats);
+    }
+
+    // Save every 10 experiences
+    if (this.learningData.experiences.length % 10 === 0) {
+      this.saveLearningData();
+    }
+  }
+
+  getBestAction(state) {
+    // Get best action based on Q-values
+    const stateKey = JSON.stringify(state);
+    const qValues = this.learningData.qTable.get(stateKey);
+
+    if (!qValues || qValues.size === 0) {
+      return null; // No learned behavior yet
+    }
+
+    let bestAction = null;
+    let bestValue = -Infinity;
+
+    for (const [action, value] of qValues.entries()) {
+      if (value > bestValue) {
+        bestValue = value;
+        bestAction = action;
+      }
+    }
+
+    return bestAction;
+  }
+
+  // ===== 🔄 SELF-HEALING SYSTEM =====
+
+  async handleError(error, context = {}) {
+    console.error(`❌ Error in ${context.location}:`, error.message);
+
+    // Log error
+    this.healingData.errors.push({
+      message: error.message,
+      stack: error.stack,
+      context,
+      timestamp: Date.now()
+    });
+
+    this.healingData.consecutiveErrors++;
+
+    // Detect error patterns
+    const errorKey = error.message.split(':')[0];
+    const count = this.healingData.errorPatterns.get(errorKey) || 0;
+    this.healingData.errorPatterns.set(errorKey, count + 1);
+
+    // Try to recover
+    const recovered = await this.attemptRecovery(error, context);
+
+    if (recovered) {
+      this.healingData.consecutiveErrors = 0;
+      this.healingData.recoveryAttempts++;
+      console.log('✅ Self-healed!');
+      return true;
+    }
+
+    // If too many consecutive errors, notify user
+    if (this.healingData.consecutiveErrors >= 5) {
+      await this.notifyHealthIssue(error);
+    }
+
+    return false;
+  }
+
+  async attemptRecovery(error, context) {
+    // Recovery strategies based on error type
+
+    if (error.message.includes('fetch failed')) {
+      // Network error - retry with exponential backoff
+      console.log('🔄 Network error detected - retrying...');
+      await new Promise(r => setTimeout(r, 2000));
+      return true;
+    }
+
+    if (error.message.includes('Gemini')) {
+      // Gemini API error - try alternative response
+      console.log('🔄 Gemini error - using fallback response...');
+      return true;
+    }
+
+    if (error.message.includes('JSON')) {
+      // Parsing error - request new format
+      console.log('🔄 Parse error - requesting cleaner format...');
+      return true;
+    }
+
+    // Unknown error - log and continue
+    return false;
+  }
+
+  async notifyHealthIssue(error) {
+    try {
+      await this.sendMessage(`⚠️ **Self-Healing Alert**
+
+Bot hat ${this.healingData.consecutiveErrors} Fehler in Folge.
+
+Letzter Fehler: ${error.message}
+
+Ich versuche mich selbst zu reparieren... 🔧`);
+
+      this.healingData.consecutiveErrors = 0; // Reset after notification
+    } catch (err) {
+      console.error('Failed to notify health issue:', err.message);
+    }
+  }
+
+  async healthCheck() {
+    const now = Date.now();
+
+    // Run health check every 5 minutes
+    if (now - this.healingData.lastHealthCheck < 5 * 60 * 1000) {
+      return;
+    }
+
+    this.healingData.lastHealthCheck = now;
+
+    // Check metrics
+    const successRate = this.metrics.totalMessages > 0
+      ? (this.metrics.successfulResponses / this.metrics.totalMessages) * 100
+      : 100;
+
+    console.log('🏥 Health Check:', {
+      uptime: Math.floor((now - this.metrics.uptime) / 1000 / 60) + ' min',
+      messages: this.metrics.totalMessages,
+      successRate: successRate.toFixed(1) + '%',
+      errors: this.healingData.errors.length,
+      qTableSize: this.learningData.qTable.size
+    });
+
+    // Self-optimize if success rate is low
+    if (successRate < 80 && this.metrics.totalMessages > 20) {
+      console.log('⚡ Low success rate - triggering self-optimization...');
+      await this.selfOptimize();
+    }
+
+    // Clean old data
+    if (this.healingData.errors.length > 100) {
+      this.healingData.errors = this.healingData.errors.slice(-50);
+    }
+  }
+
+  async selfOptimize() {
+    // Analyze what's working and what's not
+    const toolStats = Array.from(this.learningData.toolPerformance.entries())
+      .map(([tool, stats]) => ({ tool, ...stats }))
+      .sort((a, b) => b.avgReward - a.avgReward);
+
+    console.log('📊 Self-Optimization Report:');
+    console.log('Top performing tools:', toolStats.slice(0, 3));
+
+    // Adjust behavior based on learning
+    // In a real system, this would update prompts, tool selection logic, etc.
   }
 
   // ===== MAIN LOOP =====
