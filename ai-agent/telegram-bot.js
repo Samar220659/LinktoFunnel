@@ -22,6 +22,7 @@ const { createClient } = require('@supabase/supabase-js');
 const { MegaCrossPoster } = require('./integrations/mega-cross-poster');
 const { ViralContentCreator } = require('./agents/viral-content-creator');
 const { AccountManager } = require('./agents/account-manager');
+const { getQueue } = require('./core/content-queue');
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -37,6 +38,7 @@ class TelegramBot {
     this.crossPoster = new MegaCrossPoster();
     this.contentCreator = new ViralContentCreator();
     this.accountManager = new AccountManager();
+    this.contentQueue = getQueue();
     this.lastUpdateId = 0;
   }
 
@@ -123,6 +125,18 @@ class TelegramBot {
 
       case '/funnel':
         return this.cmdFunnel(chatId, args);
+
+      case '/pending':
+        return this.cmdPending(chatId);
+
+      case '/approve':
+        return this.cmdApprove(chatId, args);
+
+      case '/reject':
+        return this.cmdReject(chatId, args);
+
+      case '/queue':
+        return this.cmdQueueStatus(chatId);
 
       case '/help':
         return this.cmdHelp(chatId);
@@ -420,6 +434,141 @@ Use /stats for detailed analytics
     return this.sendMessage(chatId, result);
   }
 
+  async cmdPending(chatId) {
+    await this.sendMessage(chatId, '📋 Loading pending posts...');
+
+    try {
+      const pending = await this.contentQueue.getPending();
+
+      if (pending.length === 0) {
+        return this.sendMessage(chatId, '✅ No pending posts!\n\nContent wird 3x täglich generiert:\n⏰ 09:00, 14:00, 19:00 Uhr');
+      }
+
+      let message = `<b>📋 PENDING POSTS (${pending.length})</b>\n━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+
+      for (const item of pending) {
+        const formatted = this.contentQueue.formatItem(item);
+        const preview = item.content?.script?.hook || item.content?.caption || 'No preview';
+
+        message += `<b>${item.id}</b>\n`;
+        message += `📱 ${formatted.platforms}\n`;
+        message += `📝 ${preview.substring(0, 80)}${preview.length > 80 ? '...' : ''}\n`;
+        message += `🕐 ${formatted.created}\n\n`;
+        message += `▶️ /approve ${item.id}\n`;
+        message += `❌ /reject ${item.id}\n`;
+        message += `━━━━━━━━━━━━━━━━━━\n\n`;
+      }
+
+      message += '💡 Approve um zu posten!';
+
+      return this.sendMessage(chatId, message);
+
+    } catch (error) {
+      return this.sendMessage(chatId, `❌ Error: ${error.message}`);
+    }
+  }
+
+  async cmdApprove(chatId, args) {
+    if (!args[0]) {
+      return this.sendMessage(chatId, '❌ Usage: /approve <post_id>\n\nGet post IDs with /pending');
+    }
+
+    const postId = args[0];
+
+    await this.sendMessage(chatId, `⏳ Approving ${postId}...`);
+
+    try {
+      const item = await this.contentQueue.approve(postId);
+
+      const result = `
+✅ <b>CONTENT APPROVED!</b>
+
+<b>Post ID:</b> ${item.id}
+<b>Platforms:</b> ${item.platforms.join(', ')}
+<b>Status:</b> Approved ✅
+
+━━━━━━━━━━━━━━━━━━━━━━
+
+🤖 <b>AGENT WIRD JETZT AUTOMATISCH POSTEN!</b>
+
+Der Auto-Posting Worker wird innerhalb der nächsten 60 Sekunden:
+✅ Content optimieren
+✅ Zu allen Plattformen posten
+✅ Dir Benachrichtigung senden
+
+⏱️ Bitte warten...
+      `;
+
+      return this.sendMessage(chatId, result);
+
+    } catch (error) {
+      return this.sendMessage(chatId, `❌ Error: ${error.message}\n\nPrüfe Post ID mit /pending`);
+    }
+  }
+
+  async cmdReject(chatId, args) {
+    if (!args[0]) {
+      return this.sendMessage(chatId, '❌ Usage: /reject <post_id> [reason]\n\nGet post IDs with /pending');
+    }
+
+    const postId = args[0];
+    const reason = args.slice(1).join(' ') || 'No reason given';
+
+    await this.sendMessage(chatId, `⏳ Rejecting ${postId}...`);
+
+    try {
+      const item = await this.contentQueue.reject(postId, reason);
+
+      const result = `
+❌ <b>CONTENT REJECTED</b>
+
+<b>Post ID:</b> ${item.id}
+<b>Reason:</b> ${reason}
+<b>Status:</b> Rejected
+
+━━━━━━━━━━━━━━━━━━━━━━
+
+Der Agent wird beim nächsten Zyklus neuen Content generieren!
+
+⏰ Nächste Generation: 09:00, 14:00 oder 19:00 Uhr
+      `;
+
+      return this.sendMessage(chatId, result);
+
+    } catch (error) {
+      return this.sendMessage(chatId, `❌ Error: ${error.message}\n\nPrüfe Post ID mit /pending`);
+    }
+  }
+
+  async cmdQueueStatus(chatId) {
+    await this.sendMessage(chatId, '📊 Loading queue status...');
+
+    try {
+      const stats = await this.contentQueue.getStats();
+
+      const status = `
+<b>📦 QUEUE STATUS</b>
+━━━━━━━━━━━━━━━━━━━━━━
+
+<b>📋 Pending:</b> ${stats.pending}
+<b>✅ Approved:</b> ${stats.approved}
+<b>❌ Rejected:</b> ${stats.rejected}
+<b>📤 Posted:</b> ${stats.posted}
+<b>⚠️ Failed:</b> ${stats.failed}
+
+━━━━━━━━━━━━━━━━━━━━━━
+<b>Total:</b> ${stats.total} items
+
+💡 Use /pending to see pending posts
+      `;
+
+      return this.sendMessage(chatId, status);
+
+    } catch (error) {
+      return this.sendMessage(chatId, `❌ Error: ${error.message}`);
+    }
+  }
+
   async cmdHelp(chatId) {
     const help = `
 <b>🤖 TELEGRAM BOT COMMANDS</b>
@@ -430,11 +579,17 @@ Use /stats for detailed analytics
 /stats - Analytics dashboard
 /revenue - Revenue report
 /products - List products
+/queue - Queue status
 
-<b>🎬 Content</b>
+<b>🎬 Content & Posting</b>
 /generate [platform] - Create content
 /post [platform] - Post to platform
 /megapost - Post to ALL platforms
+
+<b>✅ Approval Workflow (NEW!)</b>
+/pending - Show pending posts
+/approve <post_id> - Approve & auto-post
+/reject <post_id> [reason] - Reject post
 
 <b>🌪️ Funnels</b>
 /funnel [product_id] - Create funnel
@@ -446,12 +601,18 @@ Use /stats for detailed analytics
 /help - This message
 
 ━━━━━━━━━━━━━━━━━━━━━━
-<b>Examples:</b>
-• /generate tiktok
-• /post instagram
-• /funnel 1
+<b>Autonomous Posting Workflow:</b>
+1. 🤖 Agent generiert Content (3x täglich)
+2. 📱 Du bekommst Notification
+3. ✅ /approve post_xyz
+4. 🚀 Agent postet automatisch!
 
-💡 More features coming soon!
+<b>Examples:</b>
+• /pending
+• /approve post_1731368400_a1b2c3d4
+• /reject post_xyz "not good enough"
+
+💡 Der Agent arbeitet vollständig autonom!
     `;
 
     return this.sendMessage(chatId, help);
@@ -508,6 +669,67 @@ Revenue: €${data.revenue}
 
 ━━━━━━━━━━━━━━━━
 ${data.trend}
+        `;
+        break;
+
+      case 'content_generated':
+        message = `
+🎬 <b>NEW CONTENT GENERATED!</b>
+
+${data.preview}
+
+━━━━━━━━━━━━━━━━━━━━━━
+📱 Platforms: ${data.platforms}
+🆔 Post ID: <code>${data.post_id}</code>
+
+━━━━━━━━━━━━━━━━━━━━━━
+<b>⚡ APPROVE TO AUTO-POST:</b>
+
+▶️ /approve ${data.post_id}
+❌ /reject ${data.post_id}
+📋 /pending
+        `;
+        break;
+
+      case 'posting_start':
+        message = `
+🚀 <b>AUTO-POSTING STARTED</b>
+
+Post ID: <code>${data.post_id}</code>
+Platforms: ${data.platforms}
+
+${data.preview}
+
+⏳ Posting in progress...
+        `;
+        break;
+
+      case 'posting_success':
+        message = `
+✅ <b>POSTED SUCCESSFULLY!</b>
+
+Post ID: <code>${data.post_id}</code>
+Success: ${data.success}/${data.total} platforms
+
+📱 <b>Posted to:</b> ${data.platforms}
+
+${data.urls ? `\n🔗 <b>URLs:</b>\n${data.urls}` : ''}
+
+━━━━━━━━━━━━━━━━━━━━━━
+🎉 Content is now LIVE!
+        `;
+        break;
+
+      case 'posting_failure':
+        message = `
+❌ <b>POSTING FAILED</b>
+
+Post ID: <code>${data.post_id}</code>
+Error: ${data.error}
+
+Attempt: ${data.attempts}/${data.max_retries}
+
+${data.attempts < data.max_retries ? '🔄 Will retry automatically' : '⚠️ Max retries reached'}
         `;
         break;
     }

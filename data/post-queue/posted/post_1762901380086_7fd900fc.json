@@ -1,0 +1,44 @@
+{
+  "id": "post_1762901380086_7fd900fc",
+  "content": {
+    "script": {
+      "hook": "🔥 Test content hook",
+      "value": "Test value proposition",
+      "cta": "Test CTA",
+      "hashtags": [
+        "test",
+        "demo"
+      ]
+    },
+    "productName": "Test Product"
+  },
+  "platforms": [
+    "tiktok",
+    "instagram"
+  ],
+  "status": "posted",
+  "created_at": "2025-11-11T22:49:40.086Z",
+  "updated_at": "2025-11-11T22:49:44.136Z",
+  "attempts": 0,
+  "errors": [],
+  "approved_at": "2025-11-11T22:49:40.088Z",
+  "posted_at": "2025-11-11T22:49:44.136Z",
+  "post_results": [
+    {
+      "platform": "tiktok",
+      "success": true,
+      "simulated": true,
+      "post_id": "sim_1cmuc",
+      "url": "https://tiktok.com/post/1cmuc",
+      "content": "🔥 Test content hook\nTest CTA"
+    },
+    {
+      "platform": "instagram",
+      "success": true,
+      "simulated": true,
+      "post_id": "sim_yoefc",
+      "url": "https://instagram.com/post/yoefc",
+      "content": "🔥 Test content hook\n\nTest value proposition"
+    }
+  ]
+}

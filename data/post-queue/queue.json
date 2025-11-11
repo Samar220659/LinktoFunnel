@@ -1,0 +1,91 @@
+[
+  {
+    "id": "post_1762901380086_7fd900fc",
+    "content": {
+      "script": {
+        "hook": "🔥 Test content hook",
+        "value": "Test value proposition",
+        "cta": "Test CTA",
+        "hashtags": [
+          "test",
+          "demo"
+        ]
+      },
+      "productName": "Test Product"
+    },
+    "platforms": [
+      "tiktok",
+      "instagram"
+    ],
+    "status": "posted",
+    "created_at": "2025-11-11T22:49:40.086Z",
+    "updated_at": "2025-11-11T22:49:44.136Z",
+    "attempts": 0,
+    "errors": [],
+    "approved_at": "2025-11-11T22:49:40.088Z",
+    "posted_at": "2025-11-11T22:49:44.136Z",
+    "post_results": [
+      {
+        "platform": "tiktok",
+        "success": true,
+        "simulated": true,
+        "post_id": "sim_1cmuc",
+        "url": "https://tiktok.com/post/1cmuc",
+        "content": "🔥 Test content hook\nTest CTA"
+      },
+      {
+        "platform": "instagram",
+        "success": true,
+        "simulated": true,
+        "post_id": "sim_yoefc",
+        "url": "https://instagram.com/post/yoefc",
+        "content": "🔥 Test content hook\n\nTest value proposition"
+      }
+    ]
+  },
+  {
+    "id": "post_1762901384139_d6bd93fa",
+    "content": {
+      "script": {
+        "hook": "Test rejection"
+      }
+    },
+    "platforms": [
+      "tiktok",
+      "instagram",
+      "youtube"
+    ],
+    "status": "rejected",
+    "created_at": "2025-11-11T22:49:44.139Z",
+    "updated_at": "2025-11-11T22:49:44.139Z",
+    "attempts": 0,
+    "errors": [],
+    "rejected_at": "2025-11-11T22:49:44.139Z",
+    "rejected_reason": "Test rejection"
+  },
+  {
+    "id": "post_1762901384140_3f875be2",
+    "content": {
+      "script": {
+        "hook": "Test failure"
+      }
+    },
+    "platforms": [
+      "tiktok",
+      "instagram",
+      "youtube"
+    ],
+    "status": "approved",
+    "created_at": "2025-11-11T22:49:44.140Z",
+    "updated_at": "2025-11-11T22:49:44.142Z",
+    "attempts": 1,
+    "errors": [
+      {
+        "message": "Test error",
+        "timestamp": "2025-11-11T22:49:44.142Z",
+        "attempt": 1
+      }
+    ],
+    "approved_at": "2025-11-11T22:49:44.141Z"
+  }
+]
