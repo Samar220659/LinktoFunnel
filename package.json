@@ -12,11 +12,14 @@
 		"start": "next start",
 		"lint": "next lint",
 		"test": "node scripts/test-apis.js",
+		"test:approval": "node scripts/test-approval-system.js",
 		"generate-video": "node lib/video-generator.js",
 		"post-social": "node lib/social-media/unified-poster.js",
 		"ai-trinity": "node ai-trinity/index.js",
-		"automation": "node ai-agent/SUPER_AUTOMATION.js",
-		"telegram-bot": "node ai-agent/telegram-bot.js"
+		"automation": "node ai-agent/MASTER_ORCHESTRATOR.js",
+		"telegram-bot": "node ai-agent/telegram-bot.js",
+		"approval:pending": "node ai-agent/agents/content-approval-system.js pending",
+		"approval:stats": "node ai-agent/agents/content-approval-system.js stats"
 	},
 	"dependencies": {
 		"@anthropic-ai/sdk": "^0.20.0",

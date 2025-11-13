@@ -238,6 +238,32 @@ CREATE POLICY "Allow all for service role" ON own_products FOR ALL USING (true);
 CREATE POLICY "Allow all for service role" ON workflows FOR ALL USING (true);
 CREATE POLICY "Allow all for service role" ON notifications FOR ALL USING (true);
 
+-- ===== CONTENT APPROVAL QUEUE TABLE =====
+-- Stores content waiting for user approval before auto-posting
+
+CREATE TABLE IF NOT EXISTS content_queue (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  content_id TEXT UNIQUE NOT NULL,
+  product_id UUID REFERENCES digistore_products(id) ON DELETE SET NULL,
+  content TEXT NOT NULL,
+  platforms TEXT[] DEFAULT '{}', -- Array of platforms to post to
+  status TEXT DEFAULT 'pending_approval', -- pending_approval, approved, rejected, posted
+  video_url TEXT,
+  affiliate_link TEXT,
+  approval_user_id TEXT,
+  approved_at TIMESTAMP,
+  rejected_at TIMESTAMP,
+  rejection_reason TEXT,
+  posted_at TIMESTAMP,
+  posting_results JSONB, -- Results from auto-posting
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX idx_content_queue_status ON content_queue(status);
+CREATE INDEX idx_content_queue_created ON content_queue(created_at DESC);
+CREATE INDEX idx_content_queue_content_id ON content_queue(content_id);
+
 -- ===== INITIAL DATA =====
 
 -- Insert default workflow

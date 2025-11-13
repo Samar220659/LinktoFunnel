@@ -435,6 +435,11 @@ Use /stats for detailed analytics
 <b>🤖 TELEGRAM BOT COMMANDS</b>
 ━━━━━━━━━━━━━━━━━━━━━━
 
+<b>✅ Content Approval (NEW!)</b>
+/pending - Show content for approval
+/approve [id] - Approve & AUTO-POST
+/reject [id] - Reject content
+
 <b>📊 Information</b>
 /start - System status
 /stats - Analytics dashboard
@@ -457,14 +462,107 @@ Use /stats for detailed analytics
 
 ━━━━━━━━━━━━━━━━━━━━━━
 <b>Examples:</b>
+• /pending
+• /approve content_123456
 • /generate tiktok
-• /post instagram
 • /funnel 1
 
-💡 More features coming soon!
+💡 Agent posts automatically after approval!
     `;
 
     return this.sendMessage(chatId, help);
+  }
+
+  // ===== APPROVAL COMMANDS =====
+
+  async cmdPending(chatId) {
+    try {
+      const { ContentApprovalSystem } = require('./agents/content-approval-system');
+      const approvalSystem = new ContentApprovalSystem();
+
+      const pending = approvalSystem.getPendingContent();
+
+      if (pending.length === 0) {
+        return this.sendMessage(chatId, '✅ Keine Content zur Freigabe!');
+      }
+
+      let message = `<b>📋 CONTENT ZUR FREIGABE (${pending.length})</b>\n━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+
+      pending.slice(0, 5).forEach((item, i) => {
+        message += `<b>${i + 1}. ${item.id}</b>\n`;
+        message += `📝 ${item.content.substring(0, 100)}...\n`;
+        message += `📱 Platforms: ${item.platforms.join(', ')}\n`;
+        message += `⏰ ${new Date(item.createdAt).toLocaleString('de-DE')}\n`;
+        message += `\n👉 /approve ${item.id}\n`;
+        message += `👉 /reject ${item.id}\n\n`;
+      });
+
+      if (pending.length > 5) {
+        message += `\n<i>... und ${pending.length - 5} weitere</i>`;
+      }
+
+      return this.sendMessage(chatId, message);
+
+    } catch (error) {
+      return this.sendMessage(chatId, `❌ Fehler: ${error.message}`);
+    }
+  }
+
+  async cmdApprove(chatId, args) {
+    if (!args[0]) {
+      return this.sendMessage(chatId, '❌ Usage: /approve <content_id>');
+    }
+
+    const contentId = args[0];
+
+    try {
+      await this.sendMessage(chatId, `⏳ Approving ${contentId}...\n\n🤖 Agent startet AUTOMATISCHES POSTING!`);
+
+      const { ContentApprovalSystem } = require('./agents/content-approval-system');
+      const approvalSystem = new ContentApprovalSystem();
+
+      const content = await approvalSystem.approveContent(contentId);
+
+      const successPlatforms = Object.entries(content.postingResults?.platforms || {})
+        .filter(([_, result]) => result.success)
+        .map(([platform]) => platform);
+
+      return this.sendMessage(chatId, `
+✅ <b>CONTENT APPROVED & POSTED!</b>
+
+🎯 Content ID: ${contentId}
+
+📤 <b>Posted to:</b>
+${successPlatforms.map(p => `   ✅ ${p.toUpperCase()}`).join('\n')}
+
+📊 Erfolgreich: ${successPlatforms.length}/${content.platforms.length}
+
+🚀 Content ist LIVE!
+      `);
+
+    } catch (error) {
+      return this.sendMessage(chatId, `❌ Fehler: ${error.message}`);
+    }
+  }
+
+  async cmdReject(chatId, args) {
+    if (!args[0]) {
+      return this.sendMessage(chatId, '❌ Usage: /reject <content_id>');
+    }
+
+    const contentId = args[0];
+
+    try {
+      const { ContentApprovalSystem } = require('./agents/content-approval-system');
+      const approvalSystem = new ContentApprovalSystem();
+
+      await approvalSystem.rejectContent(contentId, 'Rejected via Telegram');
+
+      return this.sendMessage(chatId, `❌ Content rejected: ${contentId}`);
+
+    } catch (error) {
+      return this.sendMessage(chatId, `❌ Fehler: ${error.message}`);
+    }
   }
 
   // ===== NOTIFICATIONS =====

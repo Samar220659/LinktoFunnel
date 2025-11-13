@@ -188,13 +188,17 @@ class DigitalTwin {
     log('   🎬 Generiere Marketing-Content...', 'blue');
 
     try {
+      // Import approval system
+      const { ContentApprovalSystem } = require('./agents/content-approval-system');
+      const approvalSystem = new ContentApprovalSystem();
+
       // Hole Top-Produkte aus Datenbank
       const { data: products } = await supabase
         .from('digistore_products')
         .select('*')
         .eq('is_promoted', false)
         .order('conversion_score', { ascending: false })
-        .limit(5);
+        .limit(3); // Nur 3 pro Tag für bessere Qualitätskontrolle
 
       if (!products || products.length === 0) {
         log('   ℹ️  Keine Produkte zum Bewerben gefunden', 'blue');
@@ -204,39 +208,57 @@ class DigitalTwin {
       log(`   📦 ${products.length} Produkte für Content-Generierung`, 'blue');
 
       for (const product of products) {
-        log(`\n   ▶️  Video für: ${product.product_name}`, 'cyan');
+        log(`\n   ▶️  Content für: ${product.product_name}`, 'cyan');
 
-        // Erstelle Video mit LinktoFunnel
-        // (Simplified - in production würde hier die echte Video-Pipeline laufen)
+        // Generiere Marketing-Content
+        const contentText = this.generateMarketingCopy(product);
 
-        const videoData = {
-          product: product.product_name,
+        // QUEUE für USER-APPROVAL (statt direkt zu posten!)
+        const queuedContent = await approvalSystem.queueContent({
+          content: contentText,
+          platforms: ['tiktok', 'instagram', 'youtube'],
+          productId: product.id,
           affiliateLink: product.affiliate_link,
-          videoUrl: `https://placeholder.com/video-${product.id}.mp4`,
-        };
+          videoUrl: `https://placeholder.com/video-${product.id}.mp4`
+        });
 
-        // Speichere Content
-        await supabase
-          .from('generated_content')
-          .insert({
-            product_id: product.id,
-            content_type: 'video',
-            content_url: videoData.videoUrl,
-            platform: 'tiktok',
-          });
+        log(`   ✅ Content in Approval-Queue: ${queuedContent.id}`, 'green');
+        log(`   📱 User wird per Telegram benachrichtigt!`, 'cyan');
 
-        log(`   ✅ Video generiert: ${videoData.videoUrl}`, 'green');
-
-        // Markiere als promoted
+        // Markiere als "in Bearbeitung"
         await supabase
           .from('digistore_products')
           .update({ is_promoted: true })
           .eq('id', product.id);
       }
 
+      // Sende Telegram Notification
+      await this.sendTelegramNotification(
+        `📋 <b>${products.length} neuer Content zur Freigabe!</b>\n\n` +
+        `Use /pending um Content zu sehen.\n` +
+        `Use /approve <id> zum Freigeben & Auto-Posten!`
+      );
+
     } catch (error) {
       log(`   ⚠️  Content-Generierung übersprungen: ${error.message}`, 'yellow');
     }
+  }
+
+  // Generate Marketing Copy
+  generateMarketingCopy(product) {
+    // Simple template - in production würde hier GPT-4 verwendet
+    const hooks = [
+      '🔥 Niemand erzählt dir das über...',
+      '💰 So verdienst du wirklich Geld mit...',
+      '⚡ Das Geheimnis hinter...',
+      '🎯 Warum alle darüber sprechen:'
+    ];
+
+    const hook = hooks[Math.floor(Math.random() * hooks.length)];
+
+    return `${hook} ${product.product_name}!\n\n` +
+           `✨ Klick den Link für mehr Info! 👆\n\n` +
+           `#geldverdienen #affiliatemarketing #passiveseinkommen`;
   }
 
   // ===== STEP 3: FUNNEL CREATION =====
@@ -444,6 +466,33 @@ class DigitalTwin {
 
   sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  async sendTelegramNotification(message) {
+    const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
+    const CHAT_ID = process.env.TELEGRAM_CHAT_ID;
+
+    if (!BOT_TOKEN || !CHAT_ID) {
+      log('   ℹ️  Telegram nicht konfiguriert', 'yellow');
+      return;
+    }
+
+    try {
+      await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chat_id: CHAT_ID,
+          text: message,
+          parse_mode: 'HTML'
+        })
+      });
+
+      log('   ✅ Telegram Notification gesendet', 'green');
+
+    } catch (error) {
+      log(`   ⚠️  Telegram Error: ${error.message}`, 'yellow');
+    }
   }
 }
 
