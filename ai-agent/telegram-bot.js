@@ -127,6 +127,16 @@ class TelegramBot {
       case '/help':
         return this.cmdHelp(chatId);
 
+      // ===== APPROVAL SYSTEM COMMANDS =====
+      case '/pending':
+        return this.cmdPending(chatId);
+
+      case '/approve':
+        return this.cmdApprove(chatId, args);
+
+      case '/reject':
+        return this.cmdReject(chatId, args);
+
       default:
         return this.sendMessage(chatId, `❓ Unknown command: ${command}\n\nUse /help for available commands`);
     }
